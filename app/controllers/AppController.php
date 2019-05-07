@@ -19,7 +19,7 @@ class AppController extends BaseController
 
     }
 
-    public function BootstrapInfo(Request $rq, Response $rs)
+    public function Bootstrap(Request $rq, Response $rs)
     {
 
     }

@@ -3,8 +3,9 @@
 
 namespace App\Constant;
 
-
-use App\ViewModel\Def\SelectListModel;
+use App\ViewModel\SelectListModel;
+use ReflectionClass;
+use ReflectionException;
 
 class CodeBase
 {
@@ -25,13 +26,13 @@ class CodeBase
     public static function ToString($c)
     {
         try {
-            $class = new \ReflectionClass(static::class);
-        } catch (\ReflectionException $e) {
+            $class = new ReflectionClass(static::class);
+        } catch (ReflectionException $e) {
             return "Undefined";
         }
         return (array_key_exists($c,self::$Mapper[$class->name]))
             ? self::$Mapper[$class->name][$c]
-            : "Undefined"
+            : $c
         ;
     }
 
@@ -42,8 +43,8 @@ class CodeBase
     {
         $result = [];
         try {
-            $class = new \ReflectionClass(static::class);
-        } catch (\ReflectionException $e) {
+            $class = new ReflectionClass(static::class);
+        } catch (ReflectionException $e) {
             return $result;
         }
         if(isset(self::$Mapper[$class->name]) && count(self::$Mapper[$class->name]) > 0)
@@ -69,8 +70,8 @@ class CodeBase
     public static function Exists($c)
     {
         try {
-            $class = new \ReflectionClass(static::class);
-        } catch (\ReflectionException $e) {
+            $class = new ReflectionClass(static::class);
+        } catch (ReflectionException $e) {
             return false;
         }
         return (array_key_exists($c,self::$Mapper[$class->name]));

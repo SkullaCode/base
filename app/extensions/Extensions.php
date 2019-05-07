@@ -5,6 +5,7 @@ namespace App\Extension;
 
 
 use App\Utility\Logger;
+use Exception;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -40,7 +41,8 @@ class Extensions
         if(empty($error['Code']) || is_null($error['Code']))
             $error['Code'] = $message;
         $body = $response->getBody();
-        if($rq->getHeaderLine('X-Requested-With') === 'XMLHttpRequest')
+        //if($rq->getHeaderLine('X-Requested-With') === 'XMLHttpRequest')
+        if(strtolower($rq->getHeaderLine('X-Requested-With')) === 'xmlhttprequest')
         {
             $info = json_encode($error,JSON_PRETTY_PRINT);
             $body->write($info);
@@ -52,7 +54,7 @@ class Extensions
         }
         else
         {
-            $dir = self::$container->get('settings')['environment']['error_page_directory'];
+            $dir = self::$container->get('settings')['config']['error_page_directory'];
             $file = $dir.$code.'.php';
             $buffer = "";
             if(file_exists($file))
@@ -105,7 +107,7 @@ class Extensions
         }
     }
 
-    public static function LogHandler(\Exception $e)
+    public static function LogHandler(Exception $e)
     {
         /**
          * @var Logger $logger

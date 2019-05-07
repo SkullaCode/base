@@ -4,12 +4,13 @@
 namespace App\Utility;
 
 
+use App\Interfaces\ILogger;
 use Psr\Container\ContainerInterface;
 
 class Logger
 {
     /**
-     * @var \Monolog\Logger
+     * @var ILogger
      */
     protected $driver;
 

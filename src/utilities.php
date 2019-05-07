@@ -1,11 +1,13 @@
 <?php
 
 
+use Psr\Container\ContainerInterface;
+
 $exclude = [
 ];
 
 $environment = $container->get("settings")['config'];
-$path = $environment['utility_directory'];
+$path = $environment['root_directory'].DIRECTORY_SEPARATOR.'app'.DIRECTORY_SEPARATOR.'utilities';
 
 $files = scandir($path);
 foreach($files as $file)
@@ -16,12 +18,11 @@ foreach($files as $file)
         if(in_array($i['filename'],$exclude))
             continue;
         $class = $i['filename'];
-        $container[$class.'Utility'] = function(\Psr\Container\ContainerInterface $c) use ($class){
+        $container[$class.'Utility'] = function(ContainerInterface $c) use ($class){
             global $METHOD_CONTAINER;
             $namespace = "\\App\\Utility\\{$class}";
             if(!isset($METHOD_CONTAINER[$class.'Utility']))
                 $METHOD_CONTAINER[$class.'Utility'] = new $namespace($c);
-
             return $METHOD_CONTAINER[$class.'Utility'];
         };
     }

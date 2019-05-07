@@ -34,17 +34,11 @@
             "App\\Utility\\": "app/utilities/",
             "App\\Model\\": "app/models/",
             "App\\ViewModel\\": "app/viewmodels/",
-            "App\\ViewModel\\Def\\": "app/viewmodels/defs/",
             "App\\DBContext\\": "app/contexts/",
-            "App\\Request\\": "app/requests/",
-            "App\\Provider\\": "app/providers/",
             "App\\Extension\\": "app/extensions/",
             "App\\Traits\\": "app/traits/",
             "App\\Interfaces\\": "app/interfaces/",
-            "App\\Interfaces\\Context\\": "app/interfaces/contexts/",
-            "App\\Interfaces\\Utility\\": "app/interfaces/utilities/",
-            "Development\\DBContext\\": "dev/contexts/",
-            "Development\\Utility\\": "app/utilities/"
+            "Development\\DBContext\\": "dev/contexts/"
         }
     },
     "autoload-dev": {

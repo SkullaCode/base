@@ -3,29 +3,22 @@
 
 namespace App\MiddleWare;
 
-
-use App\Provider\ContextProvider;
-use App\Provider\UtilityProvider;
-use App\Traits\ErrorResultResponse;
 use App\Traits\ViewModelPopulate;
 use Psr\Container\ContainerInterface;
+use Software\Provider\Context;
+use Software\Provider\Utility;
 
 class BaseMiddleWareClass
 {
     /**
-     * @var UtilityProvider
+     * @var Utility
      */
     protected $Utility;
 
     /**
-     * @var ContextProvider
+     * @var Context
      */
     protected $Context;
-
-    /**
-     * @var array
-     */
-    protected $Settings;
 
     /**
      * @var array
@@ -36,9 +29,8 @@ class BaseMiddleWareClass
     {
         $this->Utility = $c->get("UtilityProvider");
         $this->Context = $c->get("ContextProvider");
-        $this->Settings = $c->get('settings');
-        $this->Environment = $this->Settings['environment'];
+        $this->Environment = $c->get('settings')['config'];
     }
 
-    use ViewModelPopulate, ErrorResultResponse;
+    use ViewModelPopulate;
 }

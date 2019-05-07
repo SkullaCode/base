@@ -3,33 +3,25 @@
 
 namespace App\Controller;
 
-
-use App\Provider\ContextProvider;
-use App\Provider\UtilityProvider;
-use App\Traits\ErrorResultResponse;
 use App\Traits\ViewModelAutoMap;
 use App\Traits\ViewModelPopulate;
-use Psr\Http\Message\StreamInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Software\Provider\Context;
+use Software\Provider\Utility;
 
 class BaseController
 {
     /**
-     * @var UtilityProvider
+     * @var Utility
      */
     protected $Utility;
 
     /**
-     * @var ContextProvider
+     * @var Context
      */
     protected $Context;
-
-    /**
-     * @var array
-     */
-    protected $Settings;
 
     /**
      * @var array
@@ -45,14 +37,14 @@ class BaseController
     {
         $this->Utility = $c->get("UtilityProvider");
         $this->Context = $c->get("ContextProvider");
-        $this->Settings = $c->get('settings');
-        $this->Environment = $this->Settings['config'];
+        $this->Environment = $c->get('settings')['config'];
         $this->Message = "";
     }
 
     protected function Redirect(Request $rq, Response $rs)
     {
-        if($rq->getHeaderLine('X-Requested-With') === 'XMLHttpRequest')
+        //if($rq->getHeaderLine('X-Requested-With') === 'XMLHttpRequest')
+        if(strtolower($rq->getHeaderLine('X-Requested-With')) === 'xmlhttprequest')
         {
             $rs = $rs->withStatus(301);
             return $rs;
@@ -61,5 +53,5 @@ class BaseController
         return $rs;
     }
 
-    use ViewModelPopulate, ErrorResultResponse, ViewModelAutoMap;
+    use ViewModelPopulate, ViewModelAutoMap;
 }

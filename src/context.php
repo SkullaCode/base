@@ -1,5 +1,7 @@
 <?php
 
+use Psr\Container\ContainerInterface;
+
 $environment = $container->get("settings")['config'];
 
 if($environment['mode'] === 'production')
@@ -14,7 +16,7 @@ if($environment['mode'] === 'production')
             $file = $root_dir.DIRECTORY_SEPARATOR.$dir.DIRECTORY_SEPARATOR.'Context.php';
             if(!file_exists($file)) continue;
             $namespaceString = "\\Software\\{$dir}\\";
-            $container[$dir.'Context'] = function(\Psr\Container\ContainerInterface $c) use ($dir,$namespaceString){
+            $container[$dir.'Context'] = function(ContainerInterface $c) use ($dir,$namespaceString){
                 global $METHOD_CONTAINER;
                 $namespace = "{$namespaceString}Context";
                 if(!isset($METHOD_CONTAINER[$dir.'Context']))
@@ -30,7 +32,7 @@ else
         'BaseDbContext'
     ];
 
-    $path = $environment[$environment['mode']]['context_directory'];
+    $path = $environment['root_directory'].DIRECTORY_SEPARATOR.'dev'.DIRECTORY_SEPARATOR.'contexts';
     $namespaceString = "\\Development\\DBContext\\";
     $files = scandir($path);
     foreach($files as $file)
@@ -41,7 +43,7 @@ else
             if(in_array($i['filename'],$exclude))
                 continue;
             $class = $i['filename'];
-            $container[$class.'Context'] = function(\Psr\Container\ContainerInterface $c) use ($class,$namespaceString){
+            $container[$class.'Context'] = function(ContainerInterface $c) use ($class,$namespaceString){
                 global $METHOD_CONTAINER;
                 $namespace = "{$namespaceString}{$class}";
                 if(!isset($METHOD_CONTAINER[$class.'Context']))

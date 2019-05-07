@@ -4,6 +4,7 @@
 namespace App\Utility;
 
 
+use App\Interfaces\IFlySystem;
 use League\Flysystem\FileExistsException;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\RootViolationException;
@@ -12,7 +13,7 @@ use Psr\Container\ContainerInterface;
 class FileSystem
 {
     /**
-     * @var \League\Flysystem\Filesystem file system driver
+     * @var IFlySystem file system driver
      */
     private $Driver;
 

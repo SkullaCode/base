@@ -5,10 +5,12 @@ namespace App\DBContext;
 
 use App\Constant\StatusCode;
 use App\Interfaces\DbContext;
+use App\Interfaces\ILogger;
+use App\Interfaces\IMedoo;
 use App\Model\AuditCM;
 use App\Model\BaseCM;
-use Medoo\Medoo;
-use Monolog\Logger;
+use DateTime;
+use Exception;
 use Psr\Container\ContainerInterface;
 use ReflectionObject;
 use ReflectionProperty;
@@ -21,12 +23,12 @@ class BaseDbContext extends DbContext
     protected $Model;
 
     /**
-     * @var Medoo
+     * @var IMedoo
      */
     protected $DBModel;
 
     /**
-     * @var Logger
+     * @var ILogger
      */
     protected $Logger;
 
@@ -210,7 +212,7 @@ class BaseDbContext extends DbContext
             }
             if(property_exists($result,$key))
             {
-                if($result->{$key} instanceof \DateTime)
+                if($result->{$key} instanceof DateTime)
                 {
                     $model[$key] = $result->{$key}->format('Y-m-d H:i:s');
                     continue;
@@ -276,12 +278,12 @@ class BaseDbContext extends DbContext
              * @var AuditCM $model
              */
             try {
-                $model->CreatedAt = new \DateTime($result[$this->CTS]);
-            } catch (\Exception $e) {
+                $model->CreatedAt = new DateTime($result[$this->CTS]);
+            } catch (Exception $e) {
             }
             try {
-                $model->ModifiedAt = new \DateTime($result[$this->MTS]);
-            } catch (\Exception $e) {
+                $model->ModifiedAt = new DateTime($result[$this->MTS]);
+            } catch (Exception $e) {
             }
             $model->CreatedBy = $result[$this->CBY];
             $model->ModifiedBy = $result[$this->MBY];
@@ -311,15 +313,15 @@ class BaseDbContext extends DbContext
             case "boolean"  : { return (boolean)$elem;  }
             case "date"     : {
                 try {
-                    return new \DateTime($elem);
-                } catch (\Exception $e) {
+                    return new DateTime($elem);
+                } catch (Exception $e) {
                     return null;
                 }
             }
             case "datetime" : {
                 try {
-                    return new \DateTime($elem);
-                } catch (\Exception $e) {
+                    return new DateTime($elem);
+                } catch (Exception $e) {
                     return null;
                 }
             }

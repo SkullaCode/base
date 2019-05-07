@@ -1,28 +1,37 @@
 <?php
 
 
+use Psr\Container\ContainerInterface;
+use Software\Provider\Context;
+use Software\Provider\Utility;
+
 $exclude = [
 
 ];
 $environment = $container->get("settings")['config'];
-$path = $environment['provider_directory'];
+$path = $environment['root_directory'].
+    DIRECTORY_SEPARATOR.
+    'software'.
+    DIRECTORY_SEPARATOR.
+    'Provider'.
+    DIRECTORY_SEPARATOR;
+$context_path = $path.'Context.php';
+$utility_path = $path.'Utility.php';
 
-$files = scandir($path);
-foreach($files as $file)
-{
-    $i = pathinfo($file);
-    if (isset($i['extension']) && $i['extension'] == 'php')
-    {
-        if(in_array($i['filename'],$exclude))
-            continue;
-        $class = $i['filename'];
-        $container[$class] = function(\Psr\Container\ContainerInterface $c) use ($class){
-            global $METHOD_CONTAINER;
-            $namespace = "\\App\\Provider\\{$class}";
-            if(!isset($METHOD_CONTAINER[$class]))
-                $METHOD_CONTAINER[$class] = new $namespace($c);
+if(!file_exists($context_path)) throw new Exception("Context provider missing");
+$container['ContextProvider'] = function(ContainerInterface $c){
+    global $METHOD_CONTAINER;
+    if(!isset($METHOD_CONTAINER['ContextProvider']))
+        $METHOD_CONTAINER['ContextProvider'] = new Context($c);
 
-            return $METHOD_CONTAINER[$class];
-        };
-    }
-}
+    return $METHOD_CONTAINER['ContextProvider'];
+};
+
+if(!file_exists($utility_path)) throw new Exception("Utility provider missing");
+$container['UtilityProvider'] = function(ContainerInterface $c){
+    global $METHOD_CONTAINER;
+    if(!isset($METHOD_CONTAINER['UtilityProvider']))
+        $METHOD_CONTAINER['UtilityProvider'] = new Utility($c);
+
+    return $METHOD_CONTAINER['UtilityProvider'];
+};

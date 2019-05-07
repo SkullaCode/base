@@ -35,10 +35,11 @@ class SessionExists extends BaseMiddleWareClass
     {
         $this->Utility->Session->Destroy();
         $this->Utility->Session->Lock();
-        if($rq->isXhr())
+        if(strtolower($rq->getHeaderLine('X-Requested-With')) === 'xmlhttprequest')
         {
             return $rs->withStatus(403,"Access Forbidden");
         }
-        return $rs->withRedirect($this->Utility->Request->BaseURL());
+        $rs = $rs->withStatus(302)->withHeader('Location',$this->Utility->Request->BaseURL());
+        return $rs;
     }
 }

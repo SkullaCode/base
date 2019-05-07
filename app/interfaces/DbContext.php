@@ -2,8 +2,6 @@
 
 namespace App\Interfaces;
 
-use App\Interfaces\Context\IDbContext;
-
 abstract class DbContext implements IDbContext
 {
     /**

@@ -20,15 +20,13 @@ class SessionTracker extends BaseMiddleWareClass
             $sessionLoad = [
                 'token'     =>  null,
                 'instance'  =>  'new',
-                'admin'     =>  false,
                 'params'    =>  []
             ];
             $session->SetItem("SESSION_LOAD",$sessionLoad);
         }
         $rq = $rq
             ->withAttribute('SessionToken',$sessionLoad['token'])
-            ->withAttribute('ApplicationState',$sessionLoad['instance'])
-            ->withAttribute('IsAdmin',$sessionLoad['admin']);
+            ->withAttribute('ApplicationState',$sessionLoad['instance']);
 
         $rs =  $next($rq,$rs);
         $this->Utility->Session->Lock();

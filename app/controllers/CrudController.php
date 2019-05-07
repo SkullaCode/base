@@ -6,10 +6,11 @@ namespace App\Controller;
 use App\Constant\ErrorCode;
 use App\Constant\ModelMapping;
 use App\Extension\Extensions;
-use App\Interfaces\Context\IDbContext;
+use App\Interfaces\IDbContext;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface;
 
 
 class CrudController extends BaseController
@@ -53,13 +54,13 @@ class CrudController extends BaseController
         $viewModel = $rq->getAttribute("ViewModel");
         $model = new $this->model();
         $this->Map($model,$viewModel);
-        $model = $this->ModelMapping($model,$viewModel,ModelMapping::ADDING);
+        $model = $this->ModelMapping($model,$viewModel,ModelMapping::ADDING,$rq);
         $res = $this->dbContext->Add($model);
         if(!is_null($res))
         {
             $this->Message = "{$this->entityType} added";
             $viewModel->ID = $res->ID;
-            $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::ADDING);
+            $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::ADDING,$rq);
             $rq = $rq->withAttribute("ProcessedViewModel",$viewModel);
             return Extensions::SuccessHandler($rq,$rs,$this->Message);
         }
@@ -84,12 +85,12 @@ class CrudController extends BaseController
         $viewModel = $rq->getAttribute("ViewModel");
         $model = new $this->model();
         $this->Map($model,$viewModel);
-        $model = $this->ModelMapping($model,$viewModel,ModelMapping::UPDATING);
+        $model = $this->ModelMapping($model,$viewModel,ModelMapping::UPDATING,$rq);
         $res = $this->dbContext->Update($model);
         if(!is_null($res))
         {
             $this->Message = "{$this->entityType} updated";
-            $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::UPDATING);
+            $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::UPDATING,$rq);
             $rq = $rq->withAttribute("ProcessedViewModel",$viewModel);
             return Extensions::SuccessHandler($rq,$rs,$this->Message);
         }
@@ -114,12 +115,12 @@ class CrudController extends BaseController
         $viewModel = $rq->getAttribute("ViewModel");
         $model = new $this->model();
         $this->Map($model,$viewModel);
-        $model = $this->ModelMapping($model,$viewModel,ModelMapping::DELETING);
+        $model = $this->ModelMapping($model,$viewModel,ModelMapping::DELETING,$rq);
         $res = $this->dbContext->Delete($model->ID);
         if($res)
         {
             $this->Message = "{$this->entityType} removed";
-            $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::DELETING);
+            $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::DELETING,$rq);
             $rq = $rq->withAttribute("ProcessedViewModel",$viewModel);
             return Extensions::SuccessHandler($rq,$rs,$this->Message);
         }
@@ -140,9 +141,10 @@ class CrudController extends BaseController
      * passed to the controller gathered from the request
      * @param int $mappingType enum representing the type of action calling the method
      * eg. (Adding, Deleting, etc....)
+     * @param ServerRequestInterface $request current request instance
      * @return object the mutated model
      */
-    protected function ModelMapping($model,$viewModel,$mappingType)
+    protected function ModelMapping($model,$viewModel,$mappingType,$request)
     {
         return $model;
     }
@@ -153,9 +155,10 @@ class CrudController extends BaseController
      * passed to the controller gathered from the request
      * @param int $mappingType enum representing the type of action calling the method
      * eg. (Adding, Deleting, etc....)
+     * * @param ServerRequestInterface $request current request instance
      * @return object the mutated view model
      */
-    protected function ViewModelMapping($model,$viewModel,$mappingType)
+    protected function ViewModelMapping($model,$viewModel,$mappingType,$request)
     {
         return $viewModel;
     }
