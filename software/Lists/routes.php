@@ -1,13 +1,14 @@
 <?php
 
+use App\Constant\ModelMapping;
 use Software\Lists\Service as ListsService;
 
 return [
     'route'         =>  'list',
     'middleware'    =>  [],
-    'routes'    =>  [
+    'routes'        =>  [
         [
-            'method'        =>  'get',
+            'method'        =>  ModelMapping::READING,
             'url'           =>  '/contact-number',
             'class'         =>  ListsService::class,
             'action'        =>  'ContactNumber',
@@ -16,7 +17,7 @@ return [
             ]
         ],
         [
-            'method'        =>  'get',
+            'method'        =>  ModelMapping::READING,
             'url'           =>  '/gender',
             'class'         =>  ListsService::class,
             'action'        =>  'Gender',
@@ -25,7 +26,7 @@ return [
             ]
         ],
         [
-            'method'        =>  'get',
+            'method'        =>  ModelMapping::READING,
             'url'           =>  '/marital-status',
             'class'         =>  ListsService::class,
             'action'        =>  'Marital',
@@ -34,7 +35,7 @@ return [
             ]
         ],
         [
-            'method'        =>  'get',
+            'method'        =>  ModelMapping::READING,
             'url'           =>  '/title',
             'class'         =>  ListsService::class,
             'action'        =>  'Title',

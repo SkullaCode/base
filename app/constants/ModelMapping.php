@@ -6,7 +6,8 @@ namespace App\Constant;
 
 class ModelMapping extends CodeBase
 {
-    const ADDING    = "put";
+    const CREATING    = "put";
+    const READING = "get";
     const UPDATING  = "post";
     const DELETING  = "delete";
 }
