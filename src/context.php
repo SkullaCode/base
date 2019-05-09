@@ -4,7 +4,8 @@ use Psr\Container\ContainerInterface;
 
 $environment = $container->get("settings")['config'];
 
-if($environment['mode'] === 'production')
+//if($environment['mode'] === 'production')
+if(true)
 {
     $root_dir = $environment['root_directory'].DIRECTORY_SEPARATOR.'software';
     $location = scandir($root_dir);
@@ -26,7 +27,7 @@ if($environment['mode'] === 'production')
         }
     }
 }
-else
+/*else
 {
     $exclude = [
         'BaseDbContext'
@@ -52,4 +53,4 @@ else
             };
         }
     }
-}
+}*/

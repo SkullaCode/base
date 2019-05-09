@@ -1,9 +1,13 @@
 <?php
 
 use League\Flysystem\Adapter\Local;
+use League\Flysystem\Filesystem;
 use Medoo\Medoo;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Container\ContainerInterface;
+use SlimSession\Helper;
 
 
 $container['PHPMailer'] = function(ContainerInterface $c){
@@ -58,7 +62,7 @@ $container['FlySystem'] = function(ContainerInterface $c)
 {
     $directory = $c->get('settings')['config']['storage_directory'];
     $adapter = new Local($directory);
-    return new \League\Flysystem\Filesystem($adapter);
+    return new Filesystem($adapter);
 };
 
 $container['MonoLog'] = function(ContainerInterface $c){
@@ -68,13 +72,13 @@ $container['MonoLog'] = function(ContainerInterface $c){
         'path'      =>  $path,
         'level'     =>  'error'
     ];
-    $log = new \Monolog\Logger($settings['name']);
-    $log->pushHandler(new \Monolog\Handler\StreamHandler($settings['path'],$settings['level']));
+    $log = new Logger($settings['name']);
+    $log->pushHandler(new StreamHandler($settings['path'],$settings['level']));
     return $log;
 };
 
-$container['SlimSession'] = function(ContainerInterface $c){
-    return new \SlimSession\Helper();
+$container['Session'] = function(ContainerInterface $c){
+    return new Helper();
 };
 
 /*$container['errorHandler'] = function(ContainerInterface $c){
