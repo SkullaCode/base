@@ -3,10 +3,19 @@
 
 namespace App\Interfaces;
 
-
-use Psr\Log\LoggerInterface;
-
-interface ILogger extends LoggerInterface
+interface ILogger
 {
-    public function reset();
+    public function AddSubject($subject);
+
+    public function AddMessage($message);
+
+    public function AddRecipient($email);
+
+    public function AddContent($content);
+
+    public function SaveLog();
+
+    public function GetDebugInfo();
+
+    public function Refresh();
 }

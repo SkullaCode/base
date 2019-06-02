@@ -3,11 +3,12 @@
 
 namespace App\Utility;
 
+use App\Interfaces\IEmail;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Container\ContainerInterface;
 
-class Email
+class Email implements IEmail
 {
     /**
      * @var string

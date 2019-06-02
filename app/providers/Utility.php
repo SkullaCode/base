@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Software\Provider;
+namespace App\Provider;
 
 
-use App\Utility\ArrayFunction;
+use App\Interfaces\IArrayFunction;
 use App\Utility\CodeGenerator;
 use App\Utility\Configuration;
 use App\Utility\DateTime;
@@ -61,7 +61,7 @@ class Utility
     public $Session;
 
     /**
-     * @var ArrayFunction
+     * @var IArrayFunction
      */
     public $ArrayFunction;
 

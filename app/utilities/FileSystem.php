@@ -4,13 +4,14 @@
 namespace App\Utility;
 
 
+use App\Interfaces\IFileSystem;
 use App\Interfaces\IFlySystem;
 use League\Flysystem\FileExistsException;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\RootViolationException;
 use Psr\Container\ContainerInterface;
 
-class FileSystem
+class FileSystem implements IFileSystem
 {
     /**
      * @var IFlySystem file system driver

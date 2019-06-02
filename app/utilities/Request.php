@@ -4,7 +4,9 @@
 namespace App\Utility;
 
 
-class Request
+use App\Interfaces\IRequest;
+
+class Request implements IRequest
 {
     /**
      * @return string

@@ -103,12 +103,12 @@ class BaseDbContext extends DbContext
      */
     protected $SoftDelete;
 
-    public function __construct($model,ContainerInterface $c)
+    public function __construct($model, $table, ContainerInterface $c)
     {
         $this->Model = $model;
         $this->DBModel = $c->get('Medoo');
-        $this->Logger = $c->get('MonoLog');
-        $this->Table = $this->getClassName(strtolower(get_class($this))).'s';
+        $this->Logger = $c->get('LoggerUtility');
+        $this->Table = $table;
         $this->TableStatus = 'Status';
         $this->ID = 'ID';
         $this->NullFields = [];
@@ -121,43 +121,6 @@ class BaseDbContext extends DbContext
         $this->MBY = 'mby';
         $this->AppUser = (isset($_SESSION['uid'])) ? $_SESSION['uid'] : "";
         $this->SoftDelete = false;
-    }
-
-    private function getClassName($classname)
-    {
-        if ($pos = strrpos($classname, '\\')) return substr($classname, $pos + 1);
-        return $pos;
-    }
-
-    private function GetQueryColumns()
-    {
-        $select_columns = [];
-        $vars = $this->GetModelPublicProperties();
-        $fields = $this->DBModel->select($this->Table,"*",['LIMIT' => 1]);
-        if(is_array($fields) && count($fields) > 0)
-        {
-            $fields = array_keys($fields[0]);
-            foreach($vars as $var)
-            {
-                $mappedVar = $this->Map($var->getName());
-                $mappedVar = (is_array($mappedVar)) ? $mappedVar[0] : $mappedVar;
-                if(in_array($mappedVar,['ID','Status']))
-                    continue;
-                if(!in_array($mappedVar,$fields))
-                    continue;
-                $select_columns[] = $this->Table.'.'.$mappedVar;
-            }
-        }
-        if($this->Model instanceof AuditCM)
-        {
-            $select_columns[] = $this->Table.'.'.$this->CTS;
-            $select_columns[] = $this->Table.'.'.$this->MTS;
-            $select_columns[] = $this->Table.'.'.$this->CBY;
-            $select_columns[] = $this->Table.'.'.$this->MBY;
-        }
-        $select_columns[] = $this->Table.'.'.$this->TableStatus;
-        $select_columns[] = $this->Table.'.'.$this->ID;
-        return $select_columns;
     }
 
     /**
@@ -352,16 +315,18 @@ class BaseDbContext extends DbContext
             return null;
         }
 
-        $select_columns = $this->GetQueryColumns();
+        //$select_columns = $this->GetQueryColumns();
+        $select_columns = "*";
         $res = (!empty($this->Join))
             ? $this->DBModel->select($this->Table,$this->Join,$select_columns,$where)
             : $this->DBModel->select($this->Table,$select_columns,$where);
 
         if(is_array($res) && !empty($res))
         {
-            return $this->MapModel($res[0]);
+            $model = $this->MapModel($res[0]);
+            return $model;
         }
-        $this->Logger->addError($this->DBModel->error());
+        //$this->Logger->addError($this->DBModel->error());
         return null;
     }
 
@@ -386,7 +351,8 @@ class BaseDbContext extends DbContext
             }
         }
 
-        $select_columns = $this->GetQueryColumns();
+        //$select_columns = $this->GetQueryColumns();
+        $select_columns = "*";
         $res = (!empty($this->Join))
             ? $this->DBModel->select($this->Table,$this->Join,$select_columns,$where)
             : $this->DBModel->select($this->Table,$select_columns,$where);
@@ -399,7 +365,7 @@ class BaseDbContext extends DbContext
         }
         else
         {
-            $this->Logger->addError($this->DBModel->error());
+            //$this->Logger->addError($this->DBModel->error());
         }
         return $result;
     }
@@ -474,11 +440,13 @@ class BaseDbContext extends DbContext
             $data[$this->TableStatus] = StatusCode::ACTIVE;
         $res = $this->DBModel->insert($this->Table,$data);
         if(is_bool($res)){
-            $this->Logger->addError($this->DBModel->last());
+            //$this->Logger->addError($this->DBModel->last());
             return null;
         }
-        if($res->rowCount() === 1) return ($this->AutoID) ? $this->Get($this->DBModel->id()) : $this->Get($data[$this->ID]);
-        return null;
+        $model = ($res->rowCount() === 1)
+            ? ($this->AutoID) ? $this->Get($this->DBModel->id()) : $this->Get($data[$this->ID])
+            : null;
+        return $model;
     }
 
     /**
@@ -488,22 +456,25 @@ class BaseDbContext extends DbContext
     public function Get($id)
     {
         $where = [$this->Table.'.'.$this->ID => $id];
-        $select_columns = $this->GetQueryColumns();
+        //$select_columns = $this->GetQueryColumns();
+        $select_columns = "*";
         $res = (!empty($this->Join))
             ? $this->DBModel->select($this->Table,$this->Join,$select_columns,$where)
             : $this->DBModel->select($this->Table,$select_columns,$where);
 
         if(is_array($res) && !empty($res))
         {
-            return $this->MapModel($res[0]);
+            $model = $this->MapModel($res[0]);
+            return $model;
         }
-        $this->Logger->addError($this->DBModel->error());
+        //$this->Logger->addError($this->DBModel->error());
         return null;
     }
 
     public function GetAll()
     {
-        $select_columns = $this->GetQueryColumns();
+        //$select_columns = $this->GetQueryColumns();
+        $select_columns = "*";
         $res = (!empty($this->Join))
             ? $this->DBModel->select($this->Table,$this->Join,$select_columns)
             : $this->DBModel->select($this->Table,$select_columns);
@@ -516,7 +487,7 @@ class BaseDbContext extends DbContext
         }
         else
         {
-            $this->Logger->addError($this->DBModel->error());
+            //$this->Logger->addError($this->DBModel->error());
         }
         return $result;
     }
@@ -568,18 +539,18 @@ class BaseDbContext extends DbContext
             }
 
             $res = $this->DBModel->update($this->Table,$data,[$this->ID => $model[$this->ID]]);
-            if(!is_bool($res) && !is_null($res) && $res->rowCount() === 1)
-            {
-                return $this->Get($model[$this->ID]);
-            }
-            $this->Logger->addError($this->DBModel->error());
-            return null;
+            $model = (!is_bool($res) && !is_null($res) && $res->rowCount() === 1)
+                ? $this->Get($model[$this->ID])
+                : null;
+            if(is_null($model)) //$this->Logger->addError($this->DBModel->error());
+            return $model;
         }
         else
         {
-            $this->Logger->addError($this->DBModel->error());
+            //$this->Logger->addError($this->DBModel->error());
             return null;
         }
+        return null;
     }
 
     /**
@@ -597,9 +568,9 @@ class BaseDbContext extends DbContext
             $res = $this->Update($model);
             if(!is_null($res))
             {
-              return true;
+                return true;
             }
-            $this->Logger->addError($this->DBModel->error());
+            //$this->Logger->addError($this->DBModel->error());
             return false;
         }
         return false;
@@ -616,7 +587,7 @@ class BaseDbContext extends DbContext
         {
             return true;
         }
-        $this->Logger->addError($this->DBModel->error());
+        //$this->Logger->addError($this->DBModel->error());
         return false;
     }
 

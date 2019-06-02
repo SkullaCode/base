@@ -4,7 +4,9 @@
 namespace App\Utility;
 
 
-class CodeGenerator
+use App\Interfaces\ICodeGenerator;
+
+class CodeGenerator implements ICodeGenerator
 {
 
     /**

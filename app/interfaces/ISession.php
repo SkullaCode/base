@@ -3,74 +3,19 @@
 
 namespace App\Interfaces;
 
-interface ISession extends \Countable
+interface ISession
 {
-    /**
-     * Get a session variable.
-     *
-     * @param string $key
-     * @param mixed  $default
-     *
-     * @return mixed
-     */
-    public function get($key, $default = null);
+    public function GetItem($id,$default=null);
 
-    /**
-     * Set a session variable.
-     *
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return ISession
-     */
-    public function set($key, $value);
+    public function GetFlashItem($id,$default=null);
 
-    /**
-     * Merge values recursively.
-     *
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return ISession
-     */
-    public function merge($key, $value);
+    public function SetItem($id,$value);
 
-    /**
-     * Delete a session variable.
-     *
-     * @param string $key
-     *
-     * @return ISession
-     */
-    public function delete($key);
+    public function SetFlashItem($id,$value);
 
-    /**
-     * Clear all session variables.
-     *
-     * @return ISession
-     */
-    public function clear();
+    public function DeleteItem($id);
 
-    /**
-     * Check if a session variable is set.
-     *
-     * @param string $key
-     *
-     * @return bool
-     */
-    public function exists($key);
+    public function Lock();
 
-    /**
-     * Get or regenerate current session ID.
-     *
-     * @param bool $new
-     *
-     * @return string
-     */
-    public static function id($new = false);
-
-    /**
-     * Destroy the session.
-     */
-    public static function destroy();
+    public function Destroy();
 }

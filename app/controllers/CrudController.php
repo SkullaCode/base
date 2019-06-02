@@ -54,13 +54,13 @@ class CrudController extends BaseController
         $viewModel = $rq->getAttribute("ViewModel");
         $model = new $this->model();
         $this->Map($model,$viewModel);
-        $model = $this->ModelMapping($model,$viewModel,ModelMapping::ADDING,$rq);
+        $model = $this->ModelMapping($model,$viewModel,ModelMapping::CREATING,$rq);
         $res = $this->dbContext->Add($model);
         if(!is_null($res))
         {
             $this->Message = "{$this->entityType} added";
             $viewModel->ID = $res->ID;
-            $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::ADDING,$rq);
+            $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::CREATING,$rq);
             $rq = $rq->withAttribute("ProcessedViewModel",$viewModel);
             return Extensions::SuccessHandler($rq,$rs,$this->Message);
         }

@@ -4,7 +4,9 @@
 namespace App\Utility;
 
 
-class DateTime
+use App\Interfaces\IDateTime;
+
+class DateTime implements IDateTime
 {
     /**
      * @return string

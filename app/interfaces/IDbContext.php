@@ -7,11 +7,6 @@ namespace App\Interfaces;
 interface IDbContext
 {
     /**
-     * @return object the repository model associated with the instance
-     */
-    public function GetModel();
-
-    /**
      * @param object $model populated instance of the model
      * @return object|null
      */

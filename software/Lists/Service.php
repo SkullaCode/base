@@ -11,7 +11,6 @@ use Software\Lists\Constant\ContactNumberCode;
 use Software\Lists\Constant\GenderCode;
 use Software\Lists\Constant\MaritalStatusCode;
 use Software\Lists\Constant\TitleCode;
-use Software\Lists\ViewModel\SelectListModel;
 
 class Service extends BaseController
 {
@@ -26,9 +25,9 @@ class Service extends BaseController
 
     public function Gender(ServerRequestInterface $rq, ResponseInterface $rs)
     {
-        $result[] = new SelectListModel('Male',GenderCode::MALE);
-        $result[] = new SelectListModel('Female',GenderCode::FEMALE);
-        $result[] = new SelectListModel('Other',GenderCode::UNSPECIFIED);
+        $result[] = new Model('Male',GenderCode::MALE);
+        $result[] = new Model('Female',GenderCode::FEMALE);
+        $result[] = new Model('Other',GenderCode::UNSPECIFIED);
         $body = $rs->getBody();
         if($body->isWritable())
             $body->write(json_encode($result,JSON_PRETTY_PRINT));

@@ -44,7 +44,7 @@ return [
                     'database_type'                     =>  'sqlite',
                     'database_file'                     =>  __DIR__. DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'Default.db'
                 ],
-                //'context_directory'             =>  __DIR__. DIRECTORY_SEPARATOR . 'dev'. DIRECTORY_SEPARATOR . 'contexts'. DIRECTORY_SEPARATOR,
+                'context_directory'             =>  __DIR__. DIRECTORY_SEPARATOR . 'dev'. DIRECTORY_SEPARATOR . 'contexts'. DIRECTORY_SEPARATOR,
 
                 /*'database'    =>  [
                     'database_type'     =>  'mysql',
@@ -62,7 +62,7 @@ return [
                     'database_type'                     =>  'sqlite',
                     'database_file'                     =>  __DIR__. DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . 'Default.db'
                 ],
-                //'context_directory'             =>  ''
+                'context_directory'             =>  ''
                 /*'database'    =>  [
                     'database_type'     =>  'mysql',
                     'database_name'     =>  'eja_dev',

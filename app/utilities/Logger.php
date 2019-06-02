@@ -7,7 +7,7 @@ namespace App\Utility;
 use App\Interfaces\ILogger;
 use Psr\Container\ContainerInterface;
 
-class Logger
+class Logger implements ILogger
 {
     /**
      * @var ILogger

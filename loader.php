@@ -1,14 +1,15 @@
 <?php
 
 use Slim\App;
-use Slim\Middleware\Session;
 
 require __DIR__ . './vendor/autoload.php';
+
+//session_start();
 
 // Instantiate the app to run
 if(!file_exists(__DIR__ . './settings.php'))
 {
-    header("HTTP/1.1 500 Settings Not Found");
+    header("HTTP/1.0 500 Settings Not Found");
     exit();
 }
 $settings = require __DIR__ . './settings.php';
@@ -17,15 +18,15 @@ try
 {
     $app = new App($settings);
 }
-catch(Exception $e)
+catch(InvalidArgumentException $e)
 {
-    header("HTTP/1.1 500 Internal Server Error");
+    header("HTTP/1.0 500 Internal Server Error");
     exit();
 }
 
 // session_start() MUST be called after class instantiation
 // else it will throw a warning on newer versions of PHP
-$app->add(new Session([
+$app->add(new \Slim\Middleware\Session([
     'name' => md5('app'),
     'autorefresh' => true,
     'lifetime' => '1 hour'

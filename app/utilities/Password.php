@@ -4,7 +4,9 @@
 namespace App\Utility;
 
 
-class Password
+use App\Interfaces\IPassword;
+
+class Password implements IPassword
 {
 
     /**

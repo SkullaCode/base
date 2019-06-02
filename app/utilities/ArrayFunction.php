@@ -4,7 +4,9 @@
 namespace App\Utility;
 
 
-class ArrayFunction
+use App\Interfaces\IArrayFunction;
+
+class ArrayFunction implements IArrayFunction
 {
     public function ObjectToArray($obj)
     {

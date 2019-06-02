@@ -38,6 +38,7 @@
             "App\\Extension\\": "app/extensions/",
             "App\\Traits\\": "app/traits/",
             "App\\Interfaces\\": "app/interfaces/",
+            "App\\Provider\\": "app/providers/",
             "Development\\DBContext\\": "dev/contexts/"
         }
     },
