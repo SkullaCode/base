@@ -10,4 +10,5 @@ class ModelMapping extends CodeBase
     const READING = "get";
     const UPDATING  = "post";
     const DELETING  = "delete";
+    const UNKNOWN = "";
 }

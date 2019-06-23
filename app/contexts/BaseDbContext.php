@@ -9,6 +9,8 @@ use App\Interfaces\ILogger;
 use App\Interfaces\IMedoo;
 use App\Model\AuditCM;
 use App\Model\BaseCM;
+use App\Utility\Configuration;
+use App\Utility\Session;
 use DateTime;
 use Exception;
 use Psr\Container\ContainerInterface;
@@ -99,12 +101,21 @@ class BaseDbContext extends DbContext
     protected $Mapper;
 
     /**
-     * @var boolean
+     * @var boolean remove item or change status
      */
     protected $SoftDelete;
 
     public function __construct($model, $table, ContainerInterface $c)
     {
+        /**
+         * @var Configuration $config
+         */
+        $config = $c->get('ConfigurationUtility');
+
+        /**
+         * @var Session $session
+         */
+        $session = $c->get('SessionUtility');
         $this->Model = $model;
         $this->DBModel = $c->get('Medoo');
         $this->Logger = $c->get('LoggerUtility');
@@ -119,7 +130,7 @@ class BaseDbContext extends DbContext
         $this->MTS = 'mts';
         $this->CBY = 'cby';
         $this->MBY = 'mby';
-        $this->AppUser = (isset($_SESSION['uid'])) ? $_SESSION['uid'] : "";
+        $this->AppUser = (!is_null($session->GetItem($config->AppUserID))) ? $config->AppUserID : $config->DefaultAppUser;
         $this->SoftDelete = false;
     }
 
@@ -315,6 +326,14 @@ class BaseDbContext extends DbContext
             return null;
         }
 
+        if($this->SoftDelete)
+        {
+            if(isset($where['AND']))
+                $where["AND"][] = [$this->TableStatus.'[!=]' => StatusCode::DELETED];
+            else
+                $where["AND"] = [$this->TableStatus.'[!=]' => StatusCode::DELETED];
+        }
+
         //$select_columns = $this->GetQueryColumns();
         $select_columns = "*";
         $res = (!empty($this->Join))
@@ -349,6 +368,14 @@ class BaseDbContext extends DbContext
                 $where['LIMIT'][0] = ($where['LIMIT'][1] * $where['LIMIT'][0]);
                 $where['ORDER'] = [$this->Table.'.'.$this->ID => 'ASC'];
             }
+        }
+
+        if($this->SoftDelete)
+        {
+            if(isset($where['AND']))
+                $where["AND"][] = [$this->TableStatus.'[!=]' => StatusCode::DELETED];
+            else
+                $where["AND"] = [$this->TableStatus.'[!=]' => StatusCode::DELETED];
         }
 
         //$select_columns = $this->GetQueryColumns();
@@ -542,7 +569,7 @@ class BaseDbContext extends DbContext
             $model = (!is_bool($res) && !is_null($res) && $res->rowCount() === 1)
                 ? $this->Get($model[$this->ID])
                 : null;
-            if(is_null($model)) //$this->Logger->addError($this->DBModel->error());
+            //if(is_null($model)) //$this->Logger->addError($this->DBModel->error());
             return $model;
         }
         else
@@ -550,7 +577,6 @@ class BaseDbContext extends DbContext
             //$this->Logger->addError($this->DBModel->error());
             return null;
         }
-        return null;
     }
 
     /**

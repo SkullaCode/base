@@ -3,13 +3,14 @@
 
 namespace App\Controller;
 
+use App\Provider\Utility;
 use App\Traits\ViewModelAutoMap;
 use App\Traits\ViewModelPopulate;
+use App\Utility\Configuration;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use Software\Provider\Context;
-use Software\Provider\Utility;
 
 class BaseController
 {
@@ -24,7 +25,7 @@ class BaseController
     protected $Context;
 
     /**
-     * @var array
+     * @var Configuration
      */
     protected $Environment;
 
@@ -37,7 +38,7 @@ class BaseController
     {
         $this->Utility = $c->get("UtilityProvider");
         $this->Context = $c->get("ContextProvider");
-        $this->Environment = $c->get('settings')['config'];
+        $this->Environment = $c->get('ConfigurationUtility');
         $this->Message = "";
     }
 

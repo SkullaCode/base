@@ -37,6 +37,8 @@ return [
             'storage_directory'         =>  __DIR__ . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR,
             'template_path'             =>  __DIR__ . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR,
             'pre_loader'                =>  __DIR__ . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'index.php',
+            'app_user_id'               =>  'UID',
+            'default_app_user'          =>  'System',
             'mode'                      =>  'development',
             'development'               =>  [
 
