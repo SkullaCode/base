@@ -169,32 +169,34 @@ class BaseDbContext extends DbContext
         $vars = $this->GetModelPublicProperties();
         foreach($vars as $var)
         {
-            $key = $var->getName();
-            if($key === 'ID')
+            $name = $var->getName();
+            $key = $this->Map($name);
+            if(is_array($key)) { $key = $key[0]; }
+            if($key === $this->ID)
             {
-                $model[$this->ID] = $result->{$key};
+                $model[$this->ID] = $result->{$name};
                 continue;
             }
-            if($key === 'Status')
+            if($key === $this->TableStatus)
             {
-                $model[$this->TableStatus] = $result->{$key};
+                $model[$this->TableStatus] = $result->{$name};
                 continue;
             }
-            if(in_array($key,['CreatedAt','CreatedBy','ModifiedAt','ModifiedBy']))
+            if(in_array($key,[$this->CTS,$this->CBY,$this->MTS,$this->MBY]))
             {
                 continue;
             }
             if(property_exists($result,$key))
             {
-                if($result->{$key} instanceof DateTime)
+                if($result->{$name} instanceof DateTime)
                 {
-                    $model[$key] = $result->{$key}->format('Y-m-d H:i:s');
+                    $model[$key] = $result->{$name}->format('Y-m-d H:i:s');
                     continue;
                 }
-                if(is_null($result->{$key}) && !in_array($key,$this->NullFields))
+                if(is_null($result->{$name}) && !in_array($key,$this->NullFields))
                     continue;
             }
-            $model[$key] = $result->{$key};
+            $model[$key] = $result->{$name};
         }
         return $model;
     }
