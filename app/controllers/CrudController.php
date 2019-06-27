@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Constant\ErrorCode;
 use App\Constant\ModelMapping;
+use App\Constant\RequestModel;
 use App\Extension\Extensions;
 use App\Interfaces\IDbContext;
 use Psr\Container\ContainerInterface;
@@ -51,7 +52,7 @@ class CrudController extends BaseController
      */
     public function Create(Request $rq, Response $rs)
     {
-        $viewModel = $rq->getAttribute("ViewModel");
+        $viewModel = $rq->getAttribute(RequestModel::VIEW_MODEL);
         $model = new $this->model();
         $this->Map($model,$viewModel);
         $model = $this->ModelMapping($model,$viewModel,ModelMapping::CREATING,$rq);
@@ -61,7 +62,7 @@ class CrudController extends BaseController
             $this->Message = "{$this->entityType} added";
             $viewModel->ID = $res->ID;
             $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::CREATING,$rq);
-            $rq = $rq->withAttribute("ProcessedViewModel",$viewModel);
+            $rq = $rq->withAttribute(RequestModel::PROCESSED_MODEL,$viewModel);
             return Extensions::SuccessHandler($rq,$rs,$this->Message);
         }
         else
@@ -82,7 +83,7 @@ class CrudController extends BaseController
      */
     public function Update(Request $rq, Response $rs)
     {
-        $viewModel = $rq->getAttribute("ViewModel");
+        $viewModel = $rq->getAttribute(RequestModel::VIEW_MODEL);
         $model = new $this->model();
         $this->Map($model,$viewModel);
         $model = $this->ModelMapping($model,$viewModel,ModelMapping::UPDATING,$rq);
@@ -91,7 +92,7 @@ class CrudController extends BaseController
         {
             $this->Message = "{$this->entityType} updated";
             $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::UPDATING,$rq);
-            $rq = $rq->withAttribute("ProcessedViewModel",$viewModel);
+            $rq = $rq->withAttribute(RequestModel::PROCESSED_MODEL,$viewModel);
             return Extensions::SuccessHandler($rq,$rs,$this->Message);
         }
         else
@@ -112,7 +113,7 @@ class CrudController extends BaseController
      */
     public function Delete(Request $rq, Response $rs)
     {
-        $viewModel = $rq->getAttribute("ViewModel");
+        $viewModel = $rq->getAttribute(RequestModel::VIEW_MODEL);
         $model = new $this->model();
         $this->Map($model,$viewModel);
         $model = $this->ModelMapping($model,$viewModel,ModelMapping::DELETING,$rq);
@@ -121,7 +122,7 @@ class CrudController extends BaseController
         {
             $this->Message = "{$this->entityType} removed";
             $viewModel = $this->ViewModelMapping($res,$viewModel,ModelMapping::DELETING,$rq);
-            $rq = $rq->withAttribute("ProcessedViewModel",$viewModel);
+            $rq = $rq->withAttribute(RequestModel::PROCESSED_MODEL,$viewModel);
             return Extensions::SuccessHandler($rq,$rs,$this->Message);
         }
         else

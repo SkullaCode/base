@@ -91,11 +91,6 @@ class BaseDbContext extends DbContext
     protected $NullFields;
 
     /**
-     * @var array type mapping for model properties
-     */
-    protected $TypeMapper;
-
-    /**
      * @var array name transformation for model properties
      */
     protected $Mapper;
@@ -160,7 +155,7 @@ class BaseDbContext extends DbContext
     }
 
     /**
-     * @param object $result
+     * @param object $result Model collected for request
      * @return array
      */
     protected function ToArray($result)
@@ -171,32 +166,41 @@ class BaseDbContext extends DbContext
         {
             $name = $var->getName();
             $key = $this->Map($name);
-            if(is_array($key)) { $key = $key[0]; }
-            if($key === $this->ID)
+            if(is_array($key) && count($key) === 2) { $key = $key[0]; }
+            if(is_array($key) && count($key) === 1) { $key = $name; }
+            if(in_array($key,[
+                $this->CTS,
+                $this->CBY,
+                $this->MTS,
+                $this->MBY,
+                'CreatedAt',
+                'ModifiedAt',
+                'CreatedBy',
+                'ModifiedBy'
+            ]))
             {
-                $model[$this->ID] = $result->{$name};
                 continue;
             }
-            if($key === $this->TableStatus)
+            /*if(in_array($key,[
+                $this->ID,
+            ]))
             {
-                $model[$this->TableStatus] = $result->{$name};
+                $model[$this->ID] = ($this->AutoID)
+                    ? $result->ID
+                    : $result->{$name};
                 continue;
-            }
-            if(in_array($key,[$this->CTS,$this->CBY,$this->MTS,$this->MBY]))
-            {
-                continue;
-            }
-            if(property_exists($result,$key))
+            }*/
+            if(property_exists($result,$name))
             {
                 if($result->{$name} instanceof DateTime)
                 {
                     $model[$key] = $result->{$name}->format('Y-m-d H:i:s');
                     continue;
                 }
-                if(is_null($result->{$name}) && !in_array($key,$this->NullFields))
+                if(is_null($result->{$name}) && !in_array($name,$this->NullFields))
                     continue;
+                $model[$key] = $result->{$name};
             }
-            $model[$key] = $result->{$name};
         }
         return $model;
     }
@@ -216,6 +220,7 @@ class BaseDbContext extends DbContext
         {
             return $key;
         }
+        if($key === 'ID') return $this->ID;
         return (array_key_exists($key,$mapper))
             ? $mapper[$key] : $key;
     }
@@ -237,16 +242,16 @@ class BaseDbContext extends DbContext
             $mapping = $this->Map($name);
             if(is_array($mapping))
             {
-                $mappedName = $mapping[0];
-                $this->TypeMapper[$name] = $mapping[1];
+                $mappedName = (count($mapping) === 2) ? $mapping[0] : $name;
+                $mappedType = (count($mapping) === 2 && !empty($mapping[1])) ? $mapping[1] : 'string';
             }
             else
             {
                 $mappedName = $mapping;
+                $mappedType = 'string';
             }
-            $type = (isset($this->TypeMapper[$name])) ? $this->TypeMapper[$name] : 'string';
             if(isset($result[$mappedName]))
-                $model->{$name} = $this->MapType($result[$mappedName],$type);
+                $model->{$name} = $this->MapType($result[$mappedName],$mappedType);
         }
         if($model instanceof AuditCM)
         {
@@ -264,11 +269,7 @@ class BaseDbContext extends DbContext
             $model->CreatedBy = $result[$this->CBY];
             $model->ModifiedBy = $result[$this->MBY];
         }
-        $model->Status = (!is_null($this->TableStatus))
-            ? (int)$result[$this->TableStatus]
-            : null;
         $model->ID = $result[$this->ID];
-
         if(is_numeric($model->ID))
             $model->ID = (int)$model->ID;
         return $model;
@@ -280,21 +281,23 @@ class BaseDbContext extends DbContext
         $type = strtolower($type);
         switch($type)
         {
-            case "string"   : { return (string)$elem;   }
-            case "int"      : { return (int)$elem;      }
-            case "double"   : { return (double)$elem;   }
-            case "float"    : { return (float)$elem;    }
-            case "integer"  : { return (integer)$elem;  }
-            case "bool"     : { return (bool)$elem;     }
-            case "boolean"  : { return (boolean)$elem;  }
-            case "date"     : {
+            case "string"       : { return (string)$elem;           }
+            case "int"          : { return (int)$elem;              }
+            case "double"       : { return (double)$elem;           }
+            case "float"        : { return (float)$elem;            }
+            case "integer"      : { return (integer)$elem;          }
+            case "bool"         : { return (bool)$elem;             }
+            case "boolean"      : { return (boolean)$elem;          }
+            case "serialized"   : { return unserialize($elem);      }
+            case "json"         : { return json_decode($elem,true); }
+            case "date"         : {
                 try {
                     return new DateTime($elem);
                 } catch (Exception $e) {
                     return null;
                 }
             }
-            case "datetime" : {
+            case "datetime"     : {
                 try {
                     return new DateTime($elem);
                 } catch (Exception $e) {
@@ -461,12 +464,10 @@ class BaseDbContext extends DbContext
             $data[$this->CBY] = $this->AppUser;
             $data[$this->MBY] = $this->AppUser;
         }
-        if(!$this->AutoID)
-        {
+        if(!$this->AutoID && isset($model[$this->ID]))
             $data[$this->ID] = $model[$this->ID];
-        }
-        if(is_null($model[$this->TableStatus]))
-            $data[$this->TableStatus] = StatusCode::ACTIVE;
+        /*if(is_null($model[$this->TableStatus]))
+            $data[$this->TableStatus] = StatusCode::ACTIVE;*/
         $res = $this->DBModel->insert($this->Table,$data);
         if(is_bool($res)){
             //$this->Logger->addError($this->DBModel->last());
@@ -592,7 +593,7 @@ class BaseDbContext extends DbContext
         $model = $this->Get($id);
         if(!is_null($model))
         {
-            $model->Status = StatusCode::DELETED;
+            $model->{$this->TableStatus} = StatusCode::DELETED;
             $res = $this->Update($model);
             if(!is_null($res))
             {
