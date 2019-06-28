@@ -125,7 +125,8 @@ class BaseDbContext extends DbContext
         $this->MTS = 'mts';
         $this->CBY = 'cby';
         $this->MBY = 'mby';
-        $this->AppUser = (!is_null($session->GetItem($config->AppUserID))) ? $config->AppUserID : $config->DefaultAppUser;
+        $UID = $session->GetItem($config->AppUserID);
+        $this->AppUser = (!is_null($UID)) ? $UID : $config->DefaultAppUser;
         $this->SoftDelete = false;
     }
 

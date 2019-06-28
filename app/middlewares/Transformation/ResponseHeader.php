@@ -12,7 +12,7 @@ class ResponseHeader extends BaseMiddleWareClass
 {
     public function __invoke(Request $rq, Response $rs, $next)
     {
-        if($this->Environment['mode'] === "development")
+        if($this->Environment->Mode === "development")
         {
             $rs = $rs
                 ->withHeader('Access-Control-Allow-Origin','*')

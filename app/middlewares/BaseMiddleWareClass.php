@@ -3,10 +3,11 @@
 
 namespace App\MiddleWare;
 
+use App\Provider\Utility;
 use App\Traits\ViewModelPopulate;
+use App\Utility\Configuration;
 use Psr\Container\ContainerInterface;
 use Software\Provider\Context;
-use Software\Provider\Utility;
 
 class BaseMiddleWareClass
 {
@@ -21,7 +22,7 @@ class BaseMiddleWareClass
     protected $Context;
 
     /**
-     * @var array
+     * @var Configuration
      */
     protected $Environment;
 
@@ -29,7 +30,7 @@ class BaseMiddleWareClass
     {
         $this->Utility = $c->get("UtilityProvider");
         $this->Context = $c->get("ContextProvider");
-        $this->Environment = $c->get('settings')['config'];
+        $this->Environment = $c->get('ConfigurationUtility');
     }
 
     use ViewModelPopulate;
