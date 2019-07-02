@@ -109,11 +109,13 @@ class CrudController extends BaseController
     /**
      * @param Request $rq instance of the request
      * @param Response $rs instance of the response
+     * @param array $args query request wildcards
      * @return Response response mutated according to controller logic
      */
-    public function Delete(Request $rq, Response $rs)
+    public function Delete(Request $rq, Response $rs,$args)
     {
         $viewModel = $rq->getAttribute(RequestModel::VIEW_MODEL);
+        $viewModel->ID = $args['id'];
         $model = new $this->model();
         $this->Map($model,$viewModel);
         $model = $this->ModelMapping($model,$viewModel,ModelMapping::DELETING,$rq);

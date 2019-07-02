@@ -48,15 +48,15 @@ class BaseEntityContext implements IDbContext
      */
     protected $ArrayFunctions;
 
-    public function __construct($table, ContainerInterface $c)
+    public function __construct($table, ContainerInterface $c, $settings = [])
     {
         $this->DBModel = $c->get('Medoo');
         $this->Logger = $c->get('LoggerUtility');
         $this->ArrayFunctions = $c->get('ArrayFunctionUtility');
         $this->Table = $table;
-        $this->ID = 'ID';
-        $this->NullFields = [];
-        $this->AutoID = true;
+        $this->ID = (isset($settings['ID'])) ? $settings['ID'] : 'id';
+        $this->NullFields = (isset($settings['NullFields'])) ? $settings['NullFields'] : [];
+        $this->AutoID = (isset($settings['AutoID'])) ? (bool)$settings['AutoID'] : true;
     }
 
     /**
@@ -192,7 +192,9 @@ class BaseEntityContext implements IDbContext
             $model = (!is_bool($res) && !is_null($res) && $res->rowCount() === 1)
                 ? $this->Get($model[$this->ID])
                 : null;
-            if(is_null($model)) //$this->Logger->addError($this->DBModel->error());
+            if(is_null($model)){
+
+            } //$this->Logger->addError($this->DBModel->error());
             return $model;
         }
         else

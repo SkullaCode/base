@@ -144,6 +144,8 @@ class BaseDbContext extends DbContext
      */
     protected function Field($f)
     {
+        $f = $this->Map($f);
+        $f = (is_array($f)) ? $f[0] : $f;
         return $this->Table.'.'.$f;
     }
 
