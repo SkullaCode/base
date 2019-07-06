@@ -76,7 +76,7 @@ class Extensions
     /**
      * @param Request $rq
      * @param Response $rs
-     * @param int $code
+     * @param int|string $code
      * @param string $message
      * @return Response
      */
@@ -87,7 +87,10 @@ class Extensions
         $body = $response->getBody();
         if($rq->getHeaderLine('X-Requested-With') === 'XMLHttpRequest')
         {
-            $info = json_encode($rq->getAttribute("ProcessedViewModel"),JSON_PRETTY_PRINT);
+            $info = $rq->getAttribute("ProcessedViewModel");
+            $info = (!is_null($info))
+                ? json_encode($info,JSON_PRETTY_PRINT)
+                : "";
             $body->write($info);
             return $response
                 ->withStatus($code,$message)

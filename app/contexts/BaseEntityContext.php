@@ -5,12 +5,11 @@ namespace App\DBContext;
 
 
 use App\Interfaces\IArrayFunction;
-use App\Interfaces\IDbContext;
 use App\Interfaces\ILogger;
 use App\Interfaces\IMedoo;
 use Psr\Container\ContainerInterface;
 
-class BaseEntityContext implements IDbContext
+class BaseEntityContext
 {
     /**
      * @var IMedoo
@@ -39,9 +38,10 @@ class BaseEntityContext implements IDbContext
     protected $AutoID;
 
     /**
-     * @var string[] list of all the fields that can contain null values
+     * @var boolean determines if the primary key should be handled
+     * or not
      */
-    protected $NullFields;
+    protected $HandleID;
 
     /**
      * @var IArrayFunction
@@ -55,8 +55,8 @@ class BaseEntityContext implements IDbContext
         $this->ArrayFunctions = $c->get('ArrayFunctionUtility');
         $this->Table = $table;
         $this->ID = (isset($settings['ID'])) ? $settings['ID'] : 'id';
-        $this->NullFields = (isset($settings['NullFields'])) ? $settings['NullFields'] : [];
         $this->AutoID = (isset($settings['AutoID'])) ? (bool)$settings['AutoID'] : true;
+        $this->HandleID = (isset($settings['HandleID'])) ? (bool)$settings['HandleID'] : true;
     }
 
     /**
@@ -94,7 +94,7 @@ class BaseEntityContext implements IDbContext
 
     /**
      * @param object $model populated instance of the model
-     * @return object|null
+     * @return object|bool
      */
     public function Add($model)
     {
@@ -111,22 +111,29 @@ class BaseEntityContext implements IDbContext
                 continue;
             $data[$key] = $val;
         }
-        if(!$this->AutoID)
-            $data[$this->ID] = $model[$this->ID];
+        if($this->HandleID)
+        {
+            if(!$this->AutoID)
+                $data[$this->ID] = $model[$this->ID];
+        }
         $res = $this->DBModel->insert($this->Table,$data);
         if(is_bool($res)){
             //$this->Logger->addError($this->DBModel->last());
-            return null;
+            return false;
         }
-        $model = ($res->rowCount() === 1)
-            ? ($this->AutoID) ? $this->Get($this->DBModel->id()) : $this->Get($data[$this->ID])
-            : null;
-        return $model;
+        if($this->HandleID)
+        {
+            $model = ($res->rowCount() === 1)
+                ? ($this->AutoID) ? $this->Get($this->DBModel->id()) : $this->Get($data[$this->ID])
+                : null;
+            return $model;
+        }
+        return true;
     }
 
     /**
      * @param int|string $id primary key for the record
-     * @return null|object
+     * @return bool|object
      */
     public function Get($id)
     {
@@ -135,11 +142,11 @@ class BaseEntityContext implements IDbContext
 
         if(is_array($res) && !empty($res))
             return (object)$res[0];
-        return null;
+        return false;
     }
 
     /**
-     * @return null|object[]
+     * @return object[]
      */
     public function GetAll()
     {
@@ -155,80 +162,30 @@ class BaseEntityContext implements IDbContext
 
     /**
      * @param object $model populated instance of the model with updated info
-     * @return object|null
+     * @param array $where identifier for update
+     * @return bool
      */
-    public function Update($model)
+    public function Update($model,$where)
     {
         $model = $this->ArrayFunctions->ObjectToArray($model);
-        $res = $this->Get($model[$this->ID]);
-        if(!is_null($res))
-        {
-            //capture the original data for referencing
-            $original = $res;
-            $exclude = [
-                $this->ID
-            ];
-            $data = [];
-            foreach($model as $key => $val)
-            {
-                if(in_array($key,$exclude))
-                    continue;
-
-                //only add to update list if the value is different from the original
-                //and the value is not null
-                if(
-                    ($original->{$key} != $val) &&
-                    (
-                        (!is_null($val)) ||
-                        (is_null($val) && in_array($key,$this->NullFields))
-                    )
-                )
-                {
-                    $data[$key] = $val;
-                }
-
-            }
-            $res = $this->DBModel->update($this->Table,$data,[$this->ID => $model[$this->ID]]);
-            $model = (!is_bool($res) && !is_null($res) && $res->rowCount() === 1)
-                ? $this->Get($model[$this->ID])
-                : null;
-            if(is_null($model)){
-
-            } //$this->Logger->addError($this->DBModel->error());
-            return $model;
-        }
-        else
-        {
-            //$this->Logger->addError($this->DBModel->error());
-            return null;
-        }
-        return null;
+        $res = ($this->HandleID)
+            ? $this->DBModel->update($this->Table,$model,[$this->ID => $where[$this->ID]])
+            : $this->DBModel->update($this->Table,$model,$where);
+        return (is_bool($res)) ? $res : true;
     }
 
     /**
-     * @param int $id unique identifier for the record
+     * @param array $where
      * @return bool
      */
-    public function Delete($id)
+    public function Delete($where)
     {
-        return $this->HardDelete($id);
-    }
-
-    /**
-     * @param int $id unique identifier for the record
-     * @return bool
-     */
-    public function HardDelete($id)
-    {
-        $res = $this->DBModel->delete($this->Table,[$this->ID => $id]);
+        $res = ($this->HandleID)
+            ? $this->DBModel->delete($this->Table,[$this->ID => $where[$this->ID]])
+            : $this->DBModel->delete($this->Table,$where);
         if($res->rowCount() === 1)
             return true;
         //$this->Logger->addError($this->DBModel->error());
         return false;
-    }
-
-    public function Restore($id)
-    {
-       return true;
     }
 }

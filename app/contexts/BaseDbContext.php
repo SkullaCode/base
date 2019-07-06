@@ -213,19 +213,29 @@ class BaseDbContext extends DbContext
      * the corresponding table fields.
      * @param string $key index to search by
      * or search values and return index
+     * @param boolean $reverse
      * @return string
      */
-    private function Map($key)
+    private function Map($key,$reverse=false)
     {
-        $mapper = $this->Mapper;
-
-        if(empty($this->Mapper))
+        if(!$reverse)
         {
-            return $key;
+            if(empty($this->Mapper)) return $key;
+            $mapper = $this->Mapper;
+            if($key === 'ID') return $this->ID;
+            return (array_key_exists($key,$mapper))
+                ? $mapper[$key] : $key;
         }
-        if($key === 'ID') return $this->ID;
-        return (array_key_exists($key,$mapper))
-            ? $mapper[$key] : $key;
+        if(empty($this->Mapper)) return $key;
+        $mapper = $this->Mapper;
+        if($key === $this->ID) return 'ID';
+        foreach($mapper as $k => $val)
+        {
+            if(is_string($val) && $key === $val) return $k;
+            if(is_array($val) && count($val) === 2)
+                if($key === $val[0]) return $k;
+        }
+        return $key;
     }
 
     /**
@@ -553,11 +563,12 @@ class BaseDbContext extends DbContext
 
                 //only add to update list if the value is different from the original
                 //and the value is not null
+                $k = $this->Map($key,true);
                 if(
-                    ($original->{$key} != $val) &&
+                    ($original->{$k} != $val) &&
                     (
                         (!is_null($val)) ||
-                        (is_null($val) && in_array($key,$this->NullFields))
+                        (is_null($val) && in_array($k,$this->NullFields))
                     )
                 )
                 {

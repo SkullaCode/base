@@ -14,7 +14,6 @@ require_once './loader.php';
 // Run app
 //todo write errors to log file
 try {
-    session_start();
     $app->run();
 } catch (\Slim\Exception\MethodNotAllowedException $e) {
     header("HTTP/1.1 500 Method Not Allowed");
