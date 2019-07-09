@@ -4,6 +4,7 @@
 namespace App\Extension;
 
 
+use App\Constant\RequestModel;
 use App\Utility\Logger;
 use Exception;
 use Psr\Container\ContainerInterface;
@@ -87,7 +88,7 @@ class Extensions
         $body = $response->getBody();
         if($rq->getHeaderLine('X-Requested-With') === 'XMLHttpRequest')
         {
-            $info = $rq->getAttribute("ProcessedViewModel");
+            $info = $rq->getAttribute(RequestModel::PROCESSED_MODEL);
             $info = (!is_null($info))
                 ? json_encode($info,JSON_PRETTY_PRINT)
                 : "";

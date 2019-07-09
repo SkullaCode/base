@@ -255,8 +255,21 @@ class BaseDbContext extends DbContext
             $mapping = $this->Map($name);
             if(is_array($mapping))
             {
-                $mappedName = (count($mapping) === 2) ? $mapping[0] : $name;
-                $mappedType = (count($mapping) === 2 && !empty($mapping[1])) ? $mapping[1] : 'string';
+                if(count($mapping) === 2)
+                {
+                    $mappedName = $mapping[0];
+                    $mappedType = $mapping[1];
+                }
+                elseif(count($mapping) === 1)
+                {
+                    $mappedName = $name;
+                    $mappedType = $mapping[0];
+                }
+                else
+                {
+                    $mappedName = $name;
+                    $mappedType = 'string';
+                }
             }
             else
             {
@@ -564,17 +577,16 @@ class BaseDbContext extends DbContext
                 //only add to update list if the value is different from the original
                 //and the value is not null
                 $k = $this->Map($key,true);
+                $o = $original->{$k};
+                if($o instanceof DateTime) $o = $o->format('Y-m-d H:i:s');
                 if(
-                    ($original->{$k} != $val) &&
+                    ($o !== $val) &&
                     (
                         (!is_null($val)) ||
                         (is_null($val) && in_array($k,$this->NullFields))
                     )
                 )
-                {
                     $data[$key] = $val;
-                }
-
             }
             if($this->Model instanceof AuditCM)
             {
