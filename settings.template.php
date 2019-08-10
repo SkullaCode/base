@@ -40,6 +40,11 @@ return [
             'app_user_id'               =>  'UID',
             'default_app_user'          =>  'System',
             'mode'                      =>  'development',
+            'settings'                  =>  [
+                'table'                         =>  'settings',
+                'key'                           =>  'key',
+                'value'                         =>  'value'
+            ],
             'development'               =>  [
 
                 'database'                      =>  [
@@ -75,7 +80,6 @@ return [
                 ],*/
 
             ]
-
         ]
     ]
 ];

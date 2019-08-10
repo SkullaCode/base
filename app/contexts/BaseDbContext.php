@@ -100,6 +100,11 @@ class BaseDbContext extends DbContext
      */
     protected $SoftDelete;
 
+    /**
+     * @var array runtime model updates
+     */
+    protected $Transformer;
+
     public function __construct($model, $table, ContainerInterface $c)
     {
         /**
@@ -120,6 +125,7 @@ class BaseDbContext extends DbContext
         $this->NullFields = [];
         $this->Join = [];
         $this->Mapper = [];
+        $this->Transformer = [];
         $this->AutoID = true;
         $this->CTS = 'cts';
         $this->MTS = 'mts';
@@ -278,6 +284,21 @@ class BaseDbContext extends DbContext
             }
             if(isset($result[$mappedName]))
                 $model->{$name} = $this->MapType($result[$mappedName],$mappedType);
+            if(isset($this->Transformer[$name]))
+            {
+                $method = $this->Transformer[$name];
+                if(is_callable($method))
+                    $model->{$name} = $method($result);
+                try
+                {
+                    $model->{$name} = call_user_func($method,$result);
+                }
+                catch (\ErrorException $e)
+                {
+                    $model->{$name} = null;
+                }
+            }
+
         }
         if($model instanceof AuditCM)
         {
@@ -316,14 +337,8 @@ class BaseDbContext extends DbContext
             case "boolean"      : { return (boolean)$elem;          }
             case "serialized"   : { return unserialize($elem);      }
             case "json"         : { return json_decode($elem,true); }
+            case "datetime":
             case "date"         : {
-                try {
-                    return new DateTime($elem);
-                } catch (Exception $e) {
-                    return null;
-                }
-            }
-            case "datetime"     : {
                 try {
                     return new DateTime($elem);
                 } catch (Exception $e) {

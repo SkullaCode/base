@@ -5,6 +5,7 @@ namespace App\Provider;
 
 
 use App\Interfaces\IArrayFunction;
+use App\Interfaces\ISetting;
 use App\Utility\CodeGenerator;
 use App\Utility\Configuration;
 use App\Utility\DateTime;
@@ -64,6 +65,11 @@ class Utility
      * @var IArrayFunction
      */
     public $ArrayFunction;
+
+    /**
+     * @var ISetting
+     */
+    public $Setting;
 
     /**
      * Context constructor.

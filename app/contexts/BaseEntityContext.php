@@ -62,9 +62,9 @@ class BaseEntityContext
     /**
      * @param array $params parameters for function
      * @param callable $func search criteria
-     * @return array|null
+     * @return array
      */
-    public function GetAllWithQuery($params,$func)
+    protected function GetAllWithQuery($params,$func)
     {
         $where = $func($params);
         if(isset($where['LIMIT']))
@@ -87,8 +87,10 @@ class BaseEntityContext
             foreach($res as $r)
                 $result[] = (object)$r;
         }
-        else {}
+        else
+        {
             //$this->Logger->addError($this->DBModel->error());
+        }
         return $result;
     }
 
@@ -165,12 +167,17 @@ class BaseEntityContext
      * @param array $where identifier for update
      * @return bool
      */
-    public function Update($model,$where)
+    protected function Update($model,$where)
     {
         $model = $this->ArrayFunctions->ObjectToArray($model);
-        $res = ($this->HandleID)
-            ? $this->DBModel->update($this->Table,$model,[$this->ID => $where[$this->ID]])
-            : $this->DBModel->update($this->Table,$model,$where);
+        if(is_null($where))
+        {
+            if($this->HandleID)
+                $where = [$this->ID => $where[$this->ID]];
+            else
+                return false;
+        }
+        $res = $this->DBModel->update($this->Table,$model,$where);
         return (is_bool($res)) ? $res : true;
     }
 
@@ -178,11 +185,16 @@ class BaseEntityContext
      * @param array $where
      * @return bool
      */
-    public function Delete($where)
+    protected function Delete($where = null)
     {
-        $res = ($this->HandleID)
-            ? $this->DBModel->delete($this->Table,[$this->ID => $where[$this->ID]])
-            : $this->DBModel->delete($this->Table,$where);
+        if(is_null($where))
+        {
+            if($this->HandleID)
+                $where = [$this->ID => $where[$this->ID]];
+            else
+                return false;
+        }
+        $res = $this->DBModel->delete($this->Table,$where);
         if($res->rowCount() === 1)
             return true;
         //$this->Logger->addError($this->DBModel->error());
