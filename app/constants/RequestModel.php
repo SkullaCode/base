@@ -13,4 +13,5 @@ class RequestModel extends CodeBase
     const SESSION_LOAD          = 'SESSION_LOAD';
     const SESSION_TOKEN         = 'SessionToken';
     const APPLICATION_STATE     = 'ApplicationState';
+    const TEMPLATE              = 'Template';
 }

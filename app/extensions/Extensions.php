@@ -6,8 +6,10 @@ namespace App\Extension;
 
 use App\Constant\RequestModel;
 use App\Utility\Logger;
+use App\Utility\View;
 use Exception;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -18,9 +20,35 @@ class Extensions
      */
     private static $container;
 
+    /**
+     * @var View
+     */
+    private static $renderEngine;
+
     public static function init(ContainerInterface $c)
     {
         self::$container = $c;
+        self::$renderEngine = $c->get('ViewUtility');
+    }
+
+    /**
+     * @param ServerRequestInterface $rq
+     * @return string
+     */
+    private static function RenderView($rq)
+    {
+        $renderEngineType = self::$container->get('settings');
+        $renderEngineType = strtolower($renderEngineType['config']['render_engine']);
+        $template = $rq->getAttribute(RequestModel::TEMPLATE);
+        $params = $rq->getAttribute(RequestModel::PROCESSED_MODEL);
+        $buffer = "";
+        switch($renderEngineType)
+        {
+            case 'php'      : { $buffer = self::$renderEngine->PHPHtml($template,$params);     break; }
+            case 'twig'     : { $buffer = self::$renderEngine->TwigHtml($template,$params);    break; }
+            case 'smarty'   : { $buffer = self::$renderEngine->SmartyHtml($template,$params);  break; }
+        }
+        return $buffer;
     }
 
     /**
@@ -55,16 +83,10 @@ class Extensions
         }
         else
         {
-            $dir = self::$container->get('settings')['config']['error_page_directory'];
-            $file = $dir.$code.'.php';
-            $buffer = "";
-            if(file_exists($file))
-            {
-                ob_start();
-                require_once $file;
-                $buffer = ob_get_contents();
-                @ob_end_clean();
-            }
+            $rq = $rq
+                ->withAttribute(RequestModel::TEMPLATE,"error.{$code}")
+                ->withAttribute(RequestModel::PROCESSED_MODEL,(object)$error);
+            $buffer = self::RenderView($rq);
             $body->write($buffer);
             return $response
                 ->withStatus($code,$message)
@@ -101,7 +123,7 @@ class Extensions
         }
         else
         {
-            $buffer = "Request successful............";
+            $buffer = self::RenderView($rq);
             $body->write($buffer);
             return $response
                 ->withStatus($code,$message)

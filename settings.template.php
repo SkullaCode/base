@@ -40,6 +40,7 @@ return [
             'app_user_id'               =>  'UID',
             'default_app_user'          =>  'System',
             'mode'                      =>  'development',
+            'render_engine'             =>  'php',
             'settings'                  =>  [
                 'table'                         =>  'settings',
                 'key'                           =>  'key',

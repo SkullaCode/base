@@ -4,7 +4,9 @@
 namespace Software\Lists;
 
 
+use App\Constant\RequestModel;
 use App\Controller\BaseController;
+use App\Extension\Extensions;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Software\Lists\Constant\ContactNumberCode;
@@ -16,11 +18,8 @@ class Service extends BaseController
 {
     public function ContactNumber(ServerRequestInterface $rq, ResponseInterface $rs)
     {
-        $body = $rs->getBody();
-        if($body->isWritable())
-            $body->write(json_encode(ContactNumberCode::ToList(),JSON_PRETTY_PRINT));
-        $rs = $rs->withBody($body);
-        return $rs;
+        $rq = $rq->withAttribute(RequestModel::PROCESSED_MODEL,ContactNumberCode::ToList());
+        return Extensions::SuccessHandler($rq,$rs);
     }
 
     public function Gender(ServerRequestInterface $rq, ResponseInterface $rs)
@@ -28,28 +27,19 @@ class Service extends BaseController
         $result[] = new Model('Male',GenderCode::MALE);
         $result[] = new Model('Female',GenderCode::FEMALE);
         $result[] = new Model('Other',GenderCode::UNSPECIFIED);
-        $body = $rs->getBody();
-        if($body->isWritable())
-            $body->write(json_encode($result,JSON_PRETTY_PRINT));
-        $rs = $rs->withBody($body);
-        return $rs;
+        $rq = $rq->withAttribute(RequestModel::PROCESSED_MODEL,$result);
+        return Extensions::SuccessHandler($rq,$rs);
     }
 
     public function Marital(ServerRequestInterface $rq, ResponseInterface $rs)
     {
-        $body = $rs->getBody();
-        if($body->isWritable())
-            $body->write(json_encode(MaritalStatusCode::ToList(),JSON_PRETTY_PRINT));
-        $rs = $rs->withBody($body);
-        return $rs;
+        $rq = $rq->withAttribute(RequestModel::PROCESSED_MODEL,MaritalStatusCode::ToList());
+        return Extensions::SuccessHandler($rq,$rs);
     }
 
     public function Title(ServerRequestInterface $rq, ResponseInterface $rs)
     {
-        $body = $rs->getBody();
-        if($body->isWritable())
-            $body->write(json_encode(TitleCode::ToList(),JSON_PRETTY_PRINT));
-        $rs = $rs->withBody($body);
-        return $rs;
+        $rq = $rq->withAttribute(RequestModel::PROCESSED_MODEL,TitleCode::ToList());
+        return Extensions::SuccessHandler($rq,$rs);
     }
 }

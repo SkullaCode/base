@@ -86,6 +86,11 @@ class Configuration
     /**
      * @var string
      */
+    public $RenderEngine;
+
+    /**
+     * @var string
+     */
     public $SettingsTable;
 
     /**
@@ -97,6 +102,11 @@ class Configuration
      * @var string
      */
     public $SettingsTableValue;
+
+    /**
+     * @var array
+     */
+    public $Setting;
 
     public function __construct(ContainerInterface $c)
     {
@@ -116,8 +126,12 @@ class Configuration
         $this->ShowErrorDetailed            = $settings['displayErrorDetails'];
         $this->AppUserID                    = $settings['config']['app_user_id'];
         $this->DefaultAppUser               = $settings['config']['default_app_user'];
+        $this->RenderEngine                 = $settings['config']['render_engine'];
         $this->SettingsTable                = $settings['config']['settings']['table'];
         $this->SettingsTableKey             = $settings['config']['settings']['key'];
         $this->SettingsTableValue           = $settings['config']['settings']['value'];
+        $this->Setting                      = $settings['config']['settings'];
+
+        unset($this->Setting['table'],$this->Setting['key'],$this->Setting['value']);
     }
 }

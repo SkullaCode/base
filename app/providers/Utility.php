@@ -14,6 +14,7 @@ use App\Utility\FileSystem;
 use App\Utility\Password;
 use App\Utility\Request;
 use App\Utility\Session;
+use App\Utility\View;
 use Exception as NotFoundException;
 use Psr\Container\ContainerInterface;
 use ReflectionObject;
@@ -70,6 +71,11 @@ class Utility
      * @var ISetting
      */
     public $Setting;
+
+    /**
+     * @var View
+     */
+    public $View;
 
     /**
      * Context constructor.

@@ -81,6 +81,28 @@ $container['Session'] = function(ContainerInterface $c){
     return new Helper();
 };
 
+$container['PHPRenderer'] = function (ContainerInterface $c) {
+    $settings = $c->get('settings');
+    return new Slim\Views\PhpRenderer($settings['config']['template_path']);
+};
+
+$container['TwigRenderer'] = function(ContainerInterface $c){
+    $settings = $c->get('settings');
+    $view = new \Slim\Views\Twig($settings['config']['template_path']);
+
+    // Instantiate and add Slim specific extension
+    $router = $c->get('router');
+    $uri = \Slim\Http\Uri::createFromEnvironment(new \Slim\Http\Environment($_SERVER));
+    $view->addExtension(new \Slim\Views\TwigExtension($router, $uri));
+    return $view;
+};
+
+$container['SmartyRenderer'] = function (ContainerInterface $c) {
+    $settings = $c->get('settings');
+    $view = new \Slim\Views\Smarty($settings['config']['template_path']);
+    return $view;
+};
+
 /*$container['errorHandler'] = function(ContainerInterface $c){
     return function(\Slim\Http\Request $rq, \Slim\Http\Response $rs, Exception $exception) use ($c){
         $rq = $rq->withAttribute("Error_Location",$exception->getFile()." Line:".$exception->getLine());
