@@ -8,14 +8,14 @@ use Exception as NotFoundException;
 use Psr\Container\ContainerInterface;
 use ReflectionObject;
 use ReflectionProperty;
-use Software\File\Context as File;
+use Software\Entity\User\Context as User;
 
 class Context
 {
     /**
-     * @var File
+     * @var User
      */
-    public $File;
+    public $User;
 
     /**
      * Context constructor.
@@ -32,6 +32,4 @@ class Context
             $this->{$var->name} = $c->get($context);
         }
     }
-
-    const FILE_TABLE                = 'files';
 }

@@ -3,6 +3,10 @@
 
 use Psr\Container\ContainerInterface;
 
+/**
+ * @var ContainerInterface $container
+ */
+
 $exclude = [
 ];
 
@@ -18,12 +22,12 @@ foreach($files as $file)
         if(in_array($i['filename'],$exclude))
             continue;
         $class = $i['filename'];
-        $container[$class.'Utility'] = function(ContainerInterface $c) use ($class){
+        $container->set($class.'Utility',function(ContainerInterface $c) use ($class){
             global $METHOD_CONTAINER;
             $namespace = "\\App\\Utility\\{$class}";
             if(!isset($METHOD_CONTAINER[$class.'Utility']))
                 $METHOD_CONTAINER[$class.'Utility'] = new $namespace($c);
             return $METHOD_CONTAINER[$class.'Utility'];
-        };
+        });
     }
 }

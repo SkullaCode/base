@@ -4,18 +4,18 @@
 namespace App\Interfaces;
 
 
-use Software\Provider\SettingsModel;
+use Software\Settings\Model;
 
 interface ISetting
 {
     /**
-     * @return SettingsModel
+     * @return Model
      */
     public function Load();
 
     /**
-     * @param SettingsModel $model
+     * @param Model $model
      * @return mixed
      */
-    public function Save(SettingsModel $model);
+    public function Save(Model $model);
 }

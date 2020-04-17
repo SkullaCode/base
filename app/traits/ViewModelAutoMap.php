@@ -26,7 +26,6 @@ trait ViewModelAutoMap
         {
             $vars = (new ReflectionObject($model))->getProperties(ReflectionProperty::IS_PUBLIC);
             foreach($vars as $var)
-                if(property_exists($viewModel,$var->name))
                     $model->{$var->name} = $viewModel->{$var->name};
         }
     }

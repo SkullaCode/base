@@ -6,15 +6,17 @@ namespace App\MiddleWare\Transformation;
 
 use App\Constant\RequestModel;
 use App\MiddleWare\BaseMiddleWareClass;
+use App\ViewModel\ViewModel;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Server\RequestHandlerInterface;
 
 
 class PopulateViewModel extends BaseMiddleWareClass
 {
-    public function __invoke(Request $rq, Response $rs, $next)
+    public function __invoke(Request $rq, RequestHandlerInterface $hdl)
     {
-        $rq = $rq->withAttribute(RequestModel::VIEW_MODEL,$this->Scrape($rq));
-        return $next($rq,$rs);
+        $vm = new ViewModel($this->Scrape($rq));
+        $rq = $rq->withAttribute(RequestModel::VIEW_MODEL,$vm);
+        return $hdl->handle($rq);
     }
 }

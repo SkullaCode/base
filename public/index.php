@@ -9,19 +9,14 @@ if (PHP_SAPI == 'cli-server') {
     }
 }
 
-require_once './loader.php';
+require_once pathinfo($_SERVER['DOCUMENT_ROOT'],PATHINFO_DIRNAME).DIRECTORY_SEPARATOR.'loader.php';
 
 // Run app
 //todo write errors to log file
 try {
     $app->run();
-} catch (\Slim\Exception\MethodNotAllowedException $e) {
-    header("HTTP/1.1 500 Method Not Allowed");
-    exit();
-} catch (\Slim\Exception\NotFoundException $e) {
-    header("HTTP/1.1 404 Not Found");
-    exit();
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     header("HTTP/1.1 500 Internal Server Error");
     exit();
 }

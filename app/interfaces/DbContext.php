@@ -10,6 +10,14 @@ abstract class DbContext implements IDbContext
     public abstract function GetModel();
 
     /**
+     * @param object $model repository model associated with the instance
+     * @param string[] $filter list of properties to filter in/out
+     * @param string $filterType determines how the filter should be applied
+     * @return object view model representation of model
+     */
+    public abstract function GetViewModel($model,$filter,$filterType="out");
+
+    /**
      * @param int|string|array $id unique identifier for the record
      * @param callable|string $func
      * @return null|object

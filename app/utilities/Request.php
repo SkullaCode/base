@@ -25,10 +25,12 @@ class Request implements IRequest
     }
 
     /**
+     * @param string $slug
      * @return string
      */
-    public function BaseURL()
+    public function BaseURL($slug = "")
     {
+        $slug = ltrim($slug,"/");
         $port = ($_SERVER['SERVER_PORT'] == '80') ? '': ':'.$_SERVER['SERVER_PORT'];
         $path = '/';
         if(isset($_SERVER['PHP_SELF']))
@@ -43,7 +45,7 @@ class Request implements IRequest
             }
         }
         $scheme = (isset($_SERVER['REQUEST_SCHEME'])) ? $_SERVER['REQUEST_SCHEME'] : 'http';
-        return $scheme.'://'.$_SERVER['SERVER_NAME'].$port.$path;
+        return $scheme.'://'.$_SERVER['SERVER_NAME'].$port.$path.$slug;
     }
 
     /**
@@ -52,5 +54,15 @@ class Request implements IRequest
     public function IPAddress()
     {
         return $_SERVER['REMOTE_ADDR'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function IsAjaxRequest()
+    {
+        $headers = getallheaders();
+        if($headers) return (strtolower($headers['X-Requested-With']) === 'xmlhttprequest');
+        return false;
     }
 }

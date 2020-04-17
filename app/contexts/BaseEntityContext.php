@@ -60,7 +60,7 @@ class BaseEntityContext
     }
 
     /**
-     * @param array $params parameters for function
+     * @param mixed $params parameters for function
      * @param callable $func search criteria
      * @return array
      */
@@ -127,7 +127,7 @@ class BaseEntityContext
         {
             $model = ($res->rowCount() === 1)
                 ? ($this->AutoID) ? $this->Get($this->DBModel->id()) : $this->Get($data[$this->ID])
-                : null;
+                : false;
             return $model;
         }
         return true;
@@ -167,13 +167,13 @@ class BaseEntityContext
      * @param array $where identifier for update
      * @return bool
      */
-    protected function Update($model,$where)
+    protected function Update($model,$where=null)
     {
         $model = $this->ArrayFunctions->ObjectToArray($model);
         if(is_null($where))
         {
             if($this->HandleID)
-                $where = [$this->ID => $where[$this->ID]];
+                $where = [$this->ID => $model[$this->ID]];
             else
                 return false;
         }

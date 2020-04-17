@@ -17,9 +17,6 @@ class FileMigration extends AbstractMigration
             ->addColumn('Size','integer')
             ->addColumn('cts','datetime')
             ->addColumn('mts','datetime')
-            ->addColumn('cby','string',['limit' => 150])
-            ->addColumn('mby','string',['limit' => 150])
-            ->addColumn('Status','integer')
         ->create();
     }
 }

@@ -108,6 +108,31 @@ class Configuration
      */
     public $Setting;
 
+    /**
+     * @var bool
+     */
+    public $AccessControlOn;
+
+    /**
+     * @var bool
+     */
+    public $AuthenticationOn;
+
+    /**
+     * @var string
+     */
+    public $DefaultPassword;
+
+    /**
+     * @var bool
+     */
+    public $SimulateLogin;
+
+    /**
+     * @var int
+     */
+    public $SimulationID;
+
     public function __construct(ContainerInterface $c)
     {
         $settings                           = $c->get('settings');
@@ -131,7 +156,11 @@ class Configuration
         $this->SettingsTableKey             = $settings['config']['settings']['key'];
         $this->SettingsTableValue           = $settings['config']['settings']['value'];
         $this->Setting                      = $settings['config']['settings'];
-
+        $this->AccessControlOn              = $settings['config']['access_control'];
+        $this->AuthenticationOn             = $settings['config']['authentication'];
+        $this->DefaultPassword              = $settings['config']['default_password'];
+        $this->SimulateLogin                = $settings['config']['simulation_login'];
+        $this->SimulationID                 = $settings['config']['simulation_id'];
         unset($this->Setting['table'],$this->Setting['key'],$this->Setting['value']);
     }
 }

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title><?= htmlspecialchars($app_name); ?> | <?= htmlspecialchars($title) ?> ?></title>
+        <link href='//fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="<?= $base_url ?>css/bootstrap.min.css">
+        <link rel="stylesheet" href="<?= $base_url ?>css/font-awesome.min.css">
+        <link rel="stylesheet" href="<?= $base_url ?>css/sweetalert.css">
+        <link rel="stylesheet" href="<?= $base_url ?>css/vanillatoasts.css">
+    </head>
+    <body>
+        <input type="hidden" id="panel-button" onclick="Controller.PanelSelect(this)" data-action="">
+        <div id="login-layout" style="margin-top: 12%">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-4">
+                        <div id="MainContainer" data-action="<?= $default_panel ?>">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="<?= $base_url ?>js/jquery.min.js"></script>
+        <script src="<?= $base_url ?>js/bootstrap.min.js"></script>
+        <script src="<?= $base_url ?>js/sweetalert.min.js"></script>
+        <script src="<?= $base_url ?>js/vanillatoasts.js"></script>
+        <script src="<?= $base_url ?>js/app/varObjects.js"></script>
+        <script src="<?= $base_url ?>js/app/functions.js"></script>
+        <script src="<?= $base_url ?>js/app/services/transformation.js"></script>
+        <script src="<?= $base_url ?>js/app/services/modification.js"></script>
+        <script src="<?= $base_url ?>js/app/services/submitTransformation.js"></script>
+        <script src="<?= $base_url ?>js/app/services/data.js"></script>
+        <script src="<?= $base_url ?>js/app/services/action.js"></script>
+        <script src="<?= $base_url ?>js/app/app.js"></script>
+        <script type="application/javascript">
+            Service.Title = "<?= htmlspecialchars($app_name); ?>";
+            Service.AlertNotification = function(result){
+                swal(result.message,result.data.Code,result.status);
+            };
+            Service.ToasterNotification = function(result){
+                const title = (result.status === "success")
+                    ? "Success!" : "Error!";
+                VanillaToasts.create({
+                    title: title,
+                    text: result.message,
+                    type: result.status,
+                    timeout: 5000
+                });
+                jQuery("#vanillatoasts-container").css("z-index",1050);
+            };
+
+            Controller.HandleValidation = function(result){
+                sessionStorage.setItem("token",result.data.token);
+                window.location.href = '/';
+            };
+            Controller.BackToLogin = function(result){
+                const btn = jQuery(document).find("#panel-button");
+                btn.data("action","login");
+                btn.click();
+            };
+            jQuery(function(){
+                Controller.PanelSelect(document.getElementById(MainContainer));
+            });
+        </script>
+    </body>
+    <template>
+        <div id="login">
+            <h2>Login</h2>
+            <form action="<?= $base_url ?>user/validate" method="post">
+                <div class="form-group">
+                    <label for="email" class="control-label">Email Address</label>
+                    <input type="text" id="email" name="email" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="password" class="control-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control">
+                </div>
+                <div class="form-group">
+                    <button type="button" onclick="Controller.FormSubmit(this)" data-complete="HandleValidation" class="btn btn-sm btn-primary">Login</button>
+                    <button type="button" onclick="Controller.PanelSelect(this)" data-action="register" class="btn btn-sm btn-success">Register</button>
+                    <button type="button" onclick="Controller.PanelSelect(this)" data-action="reset" class="btn btn-sm btn-warning">Forgot Password?</button>
+                </div>
+            </form>
+        </div>
+        <div id="register">
+            <h2>Register</h2>
+            <form action="<?= $base_url ?>user/register" method="post">
+                <div class="form-group">
+                    <label for="email" class="control-label">Email Address</label>
+                    <input type="text" id="email" name="email" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="username" class="control-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="password" class="control-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control">
+                </div>
+                <div class="form-group">
+                    <button type="button" onclick="Controller.FormSubmit(this)" data-complete="BackToLogin" class="btn btn-sm btn-primary">Register</button>
+                    <button type="button" onclick="Controller.PanelSelect(this)" data-action="login" class="btn btn-sm btn-success">Back to Login</button>
+                </div>
+            </form>
+        </div>
+        <div id="reset">
+            <h2>Forgot My Password</h2>
+            <form action="<?= $base_url ?>user/reset-account" method="post">
+                <div class="form-group">
+                    <label for="email" class="control-label">Email Address</label>
+                    <input type="text" id="email" name="email" class="form-control clear-success">
+                </div>
+                <div class="form-group">
+                    <button type="button" onclick="Controller.FormSubmit(this)" class="btn btn-sm btn-primary">Reset Account</button>
+                    <button type="button" onclick="Controller.PanelSelect(this)" data-action="login" class="btn btn-sm btn-success">Back to Login</button>
+                </div>
+            </form>
+        </div>
+        <div id="change-password">
+            <h2>Change My Password</h2>
+            <form action="<?= $base_url ?>user/change-password?selector=<?= $selector?>&token=<?= $token?>" method="post">
+                <div class="form-group">
+                    <label for="password" class="control-label">New Password</label>
+                    <input type="password" id="password" name="password" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="confirm" class="control-label">Confirm New Password</label>
+                    <input type="password" id="confirm" name="confirm" class="form-control clear-error">
+                </div>
+                <div class="form-group">
+                    <button type="button" onclick="Controller.FormSubmit(this)" data-complete="BackToLogin" class="btn btn-sm btn-primary">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </template>
+</html>
+

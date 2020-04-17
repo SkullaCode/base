@@ -22,6 +22,10 @@ class ArrayFunction implements IArrayFunction
                 $new[$key] = $this->ObjectToArray($val);
             }
         }
+        if(is_null($obj))
+        {
+            $new = array();
+        }
         else
         {
             $new = $obj;

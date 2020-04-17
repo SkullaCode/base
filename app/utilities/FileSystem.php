@@ -118,4 +118,53 @@ class FileSystem implements IFileSystem
             return false;
         }
     }
+
+    public function DeleteDir($dirPath)
+    {
+        $this->CleanDir($dirPath);
+        @rmdir($dirPath);
+    }
+
+    public function CleanDir($dirPath)
+    {
+        $dirPath = rtrim($dirPath,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        $files = glob($dirPath . '{,.}[!.,!..]*', GLOB_MARK|GLOB_BRACE);
+        if(is_array($files) && !empty($files))
+        {
+            foreach ($files as $file)
+            {
+                if (is_dir($file))
+                {
+                    $this->CleanDir($file);
+                    @rmdir($file);
+                }
+                else
+                {
+                    @unlink($file);
+                }
+            }
+        }
+    }
+
+    public function RecurseCopyDir($src,$dst)
+    {
+        $dir_arr = explode(DIRECTORY_SEPARATOR,$dst);
+        $dir = '';
+        foreach($dir_arr as $d)
+        {
+            $dir .= $d;
+            if(is_dir($dir))
+            {
+                $dir .= DIRECTORY_SEPARATOR;
+                continue;
+            }
+            if(strrpos($d, '.') > 0)
+            {
+                break;
+            }
+            @mkdir($dir,0775);
+            $dir .= DIRECTORY_SEPARATOR;
+        }
+        @copy($src,$dst);
+    }
 }

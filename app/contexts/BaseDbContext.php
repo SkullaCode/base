@@ -3,7 +3,6 @@
 
 namespace App\DBContext;
 
-use App\Constant\StatusCode;
 use App\Interfaces\DbContext;
 use App\Interfaces\ILogger;
 use App\Interfaces\IMedoo;
@@ -16,6 +15,7 @@ use Exception;
 use Psr\Container\ContainerInterface;
 use ReflectionObject;
 use ReflectionProperty;
+use Software\Entity\User\Constants\Status;
 
 class BaseDbContext extends DbContext
 {
@@ -150,8 +150,15 @@ class BaseDbContext extends DbContext
      */
     protected function Field($f)
     {
+        $name = $f;
         $f = $this->Map($f);
-        $f = (is_array($f)) ? $f[0] : $f;
+        if(is_array($f))
+            if(count($f) === 2)
+                $f = $f[0];
+            elseif(count($f) === 1)
+                $f = $name;
+            else
+                $f = $name;
         return $this->Table.'.'.$f;
     }
 
@@ -282,22 +289,21 @@ class BaseDbContext extends DbContext
                 $mappedName = $mapping;
                 $mappedType = 'string';
             }
-            if(isset($result[$mappedName]))
-                $model->{$name} = $this->MapType($result[$mappedName],$mappedType);
             if(isset($this->Transformer[$name]))
             {
                 $method = $this->Transformer[$name];
                 if(is_callable($method))
+                {
                     $model->{$name} = $method($result);
-                try
-                {
-                    $model->{$name} = call_user_func($method,$result);
                 }
-                catch (\ErrorException $e)
+                else
                 {
-                    $model->{$name} = null;
+                    $name = call_user_func($method,$result);
+                    $model->{$name} = ($name) ? $name : null;
                 }
             }
+            else if(isset($result[$mappedName]))
+                $model->{$name} = $this->MapType($result[$mappedName],$mappedType);
 
         }
         if($model instanceof AuditCM)
@@ -375,9 +381,9 @@ class BaseDbContext extends DbContext
         if($this->SoftDelete)
         {
             if(isset($where['AND']))
-                $where["AND"][] = [$this->TableStatus.'[!=]' => StatusCode::DELETED];
+                $where["AND"][] = [$this->TableStatus.'[!=]' => Status::DELETED];
             else
-                $where["AND"] = [$this->TableStatus.'[!=]' => StatusCode::DELETED];
+                $where["AND"] = [$this->TableStatus.'[!=]' => Status::DELETED];
         }
 
         //$select_columns = $this->GetQueryColumns();
@@ -388,8 +394,7 @@ class BaseDbContext extends DbContext
 
         if(is_array($res) && !empty($res))
         {
-            $model = $this->MapModel($res[0]);
-            return $model;
+            return $this->MapModel($res[0]);
         }
         //$this->Logger->addError($this->DBModel->error());
         return null;
@@ -419,9 +424,9 @@ class BaseDbContext extends DbContext
         if($this->SoftDelete)
         {
             if(isset($where['AND']))
-                $where["AND"][] = [$this->TableStatus.'[!=]' => StatusCode::DELETED];
+                $where["AND"][] = [$this->TableStatus.'[!=]' => Status::DELETED];
             else
-                $where["AND"] = [$this->TableStatus.'[!=]' => StatusCode::DELETED];
+                $where["AND"] = [$this->TableStatus.'[!=]' => Status::DELETED];
         }
 
         //$select_columns = $this->GetQueryColumns();
@@ -535,8 +540,7 @@ class BaseDbContext extends DbContext
 
         if(is_array($res) && !empty($res))
         {
-            $model = $this->MapModel($res[0]);
-            return $model;
+            return $this->MapModel($res[0]);
         }
         //$this->Logger->addError($this->DBModel->error());
         return null;
@@ -634,7 +638,7 @@ class BaseDbContext extends DbContext
         $model = $this->Get($id);
         if(!is_null($model))
         {
-            $model->{$this->TableStatus} = StatusCode::DELETED;
+            $model->{$this->TableStatus} = Status::DELETED;
             $res = $this->Update($model);
             if(!is_null($res))
             {
@@ -670,9 +674,47 @@ class BaseDbContext extends DbContext
         $model = $this->Get($id);
         if(!is_null($model))
         {
-            $model->{$this->TableStatus} = StatusCode::INACTIVE;
+            $model->{$this->TableStatus} = Status::LOCKED;
             return $this->Update($model);
         }
         return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function GetViewModel($model, $filter, $filterType = "out")
+    {
+        $viewModel = [];
+        $vars = (new ReflectionObject($model))->getProperties(ReflectionProperty::IS_PUBLIC);
+        foreach($vars as $var)
+        {
+            if(!is_null($filter))
+            {
+                switch(strtolower($filterType))
+                {
+                    case "out":{
+                        if(in_array($var->getName(),$filter))
+                            break;
+                        $viewModel[$var->getName()] = $model->{$var->getName()};
+                        break;
+                    }
+                    case "in":{
+                        if(!in_array($var->getName(),$filter))
+                            break;
+                        $viewModel[$var->getName()] = $model->{$var->getName()};
+                        break;
+                    }
+                    default:{
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                $viewModel[$var->getName()] = $model->{$var->getName()};
+            }
+        }
+        return (object)$viewModel;
     }
 }

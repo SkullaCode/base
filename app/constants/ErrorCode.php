@@ -20,10 +20,13 @@ class ErrorCode
     const ACCOUNT_NOT_ADMIN             = "This account does not have admin privileges";
     const ACCOUNT_RESET_DISABLED        = "Resetting this account has been disabled";
     const ACCOUNT_VALIDATION_FAILED     = "Validation for this account has failed";
+    const ACCOUNT_CREATION_FALIED       = "Creating the account failed";
     const TOO_MANY_REQUESTS             = "There are too many requests to the server";
     const TOKEN_EXPIRED                 = "The token has expired";
     const DUPLICATE_FIELD               = "There seems to be a duplicate field";
     const PRIMARY_FIELD                 = "The field selected is a primary field";
     const PRIMARY_FIELD_MISSING         = "A primary field is missing";
     const INTERNAL_SERVER_ERROR         = "Something went wrong on the server";
+    const NO_DATA                       = "The request returned no results";
+    const NOT_FOUND                     = "The requested entity was not found";
 }

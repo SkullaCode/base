@@ -7,6 +7,14 @@ namespace App\Interfaces;
 interface IDbContext
 {
     /**
+     * @param object $model repository model associated with the instance
+     * @param string[] $filter list of properties to filter in/out
+     * @param string $filterType determines how the filter should be applied
+     * @return object view model representation of model
+     */
+    public function GetViewModel($model,$filter,$filterType="out");
+
+    /**
      * @param object $model populated instance of the model
      * @return object|null
      */

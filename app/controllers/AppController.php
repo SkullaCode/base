@@ -5,34 +5,42 @@ namespace App\Controller;
 
 use App\Constant\RequestModel;
 use App\Extension\Extensions;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Psr\Http\Message\ResponseInterface as Response;
 
 
 class AppController extends BaseController
 {
-    public function Load(Request $rq, Response $rs)
+    public function __construct(ContainerInterface $c)
     {
-        $this->Message = "Landing Page";
-        $params = (object)$rq->getQueryParams();
-        $params->title = "Landing Page";
-        $params->powered = "Powered by {$this->Environment->RenderEngine}";
-        $rq = $rq
-            ->withAttribute(RequestModel::PROCESSED_MODEL,$params)
-            ->withAttribute(RequestModel::TEMPLATE,"landing.index");
-        return Extensions::SuccessHandler($rq,$rs,$this->Message);
+        parent::__construct($c);
     }
 
-    public function Kill(Request $rq, Response $rs)
+    public function Update(Request $rq)
     {
-        $session = $this->Utility->Session;
-        $session->Destroy();
-        $rs = $rs->withHeader('Location','/');
-        return Extensions::SuccessHandler($rq,$rs,302);
-    }
+        $vm = $rq->getAttribute(RequestModel::VIEW_MODEL);
+        $exec = $vm->Executor;
+        $root_dir = ltrim($this->Environment->RootDirectory,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
+        if(!empty($exec['added']))
+            foreach($exec['added'] as $file)
+                $this->Utility->FileSystem->RecurseCopyDir(
+                    $vm->UpdateSource.$file,
+                    $root_dir.$file
+                );
 
-    public function Bootstrap(Request $rq, Response $rs)
-    {
+        if(!empty($exec['modified']))
+            foreach($exec['modified'] as $file)
+                $this->Utility->FileSystem->RecurseCopyDir(
+                    $vm->UpdateSource.$file,
+                    $root_dir.$file
+                );
 
+        if(!empty($exec['deleted']))
+            foreach($exec['deleted'] as $file)
+                @unlink($root_dir.$file);
+
+        $this->FireHook('UpdateHook',$rq);
+
+        return Extensions::SuccessHandler($rq,"Update executed successfully");
     }
 }

@@ -5,16 +5,17 @@ namespace App\Provider;
 
 
 use App\Interfaces\IArrayFunction;
+use App\Interfaces\ICodeGenerator;
+use App\Interfaces\IConfiguration;
+use App\Interfaces\IDateTime;
+use App\Interfaces\IEmail;
+use App\Interfaces\IFileSystem;
+use App\Interfaces\IPassword;
+use App\Interfaces\IRequest;
+use App\Interfaces\ISession;
 use App\Interfaces\ISetting;
-use App\Utility\CodeGenerator;
-use App\Utility\Configuration;
-use App\Utility\DateTime;
-use App\Utility\Email;
-use App\Utility\FileSystem;
-use App\Utility\Password;
-use App\Utility\Request;
-use App\Utility\Session;
-use App\Utility\View;
+use App\Interfaces\IStringFunction;
+use App\Interfaces\IView;
 use Exception as NotFoundException;
 use Psr\Container\ContainerInterface;
 use ReflectionObject;
@@ -23,42 +24,42 @@ use ReflectionProperty;
 class Utility
 {
     /**
-     * @var CodeGenerator
+     * @var ICodeGenerator
      */
     public $CodeGenerator;
 
     /**
-     * @var Configuration
+     * @var IConfiguration
      */
     public $Configuration;
 
     /**
-     * @var DateTime
+     * @var IDateTime
      */
     public $DateTime;
 
     /**
-     * @var Request
+     * @var IRequest
      */
     public $Request;
 
     /**
-     * @var Password
+     * @var IPassword
      */
     public $Password;
 
     /**
-     * @var Email
+     * @var IEmail
      */
     public $Email;
 
     /**
-     * @var FileSystem
+     * @var IFileSystem
      */
     public $FileSystem;
 
     /**
-     * @var Session
+     * @var ISession
      */
     public $Session;
 
@@ -73,7 +74,12 @@ class Utility
     public $Setting;
 
     /**
-     * @var View
+     * @var IStringFunction
+     */
+    public $StringFunction;
+
+    /**
+     * @var IView
      */
     public $View;
 

@@ -1,5 +1,6 @@
 <?php
 
+use Delight\Auth\Auth;
 use League\Flysystem\Adapter\Local;
 use League\Flysystem\Filesystem;
 use Medoo\Medoo;
@@ -7,10 +8,16 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Container\ContainerInterface;
+use Slim\Psr7\Response;
+use Slim\Views\PhpRenderer;
+use Slim\Views\Twig;
 use SlimSession\Helper;
 
+/**
+ * @var ContainerInterface $container
+ */
 
-$container['PHPMailer'] = function(ContainerInterface $c){
+$container->set('PHPMailer',function(ContainerInterface $c){
     $s = $c->get('settings')['email'];
     $mailer = new PHPMailer();
     ($s['mail-type'] == 'html')
@@ -49,23 +56,23 @@ $container['PHPMailer'] = function(ContainerInterface $c){
     }
     $mailer->setFrom($s['from'],$s['from-name']);
     return $mailer;
-};
+});
 
-$container['Medoo'] = function(ContainerInterface $c){
+$container->set('Medoo',function(ContainerInterface $c){
     $environment = $c->get("settings")['config'];
     $settings = $environment[$environment['mode']];
     if(isset($settings['database'])) { $settings = $settings['database']; }
     return new Medoo($settings);
-};
+});
 
-$container['FlySystem'] = function(ContainerInterface $c)
+$container->set('FlySystem',function(ContainerInterface $c)
 {
     $directory = $c->get('settings')['config']['storage_directory'];
     $adapter = new Local($directory);
     return new Filesystem($adapter);
-};
+});
 
-$container['MonoLog'] = function(ContainerInterface $c){
+$container->set('MonoLog',function(ContainerInterface $c){
     $path = $c->get('settings')['config']['root_directory'].DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.'logger';
     $settings = [
         'name'      =>  'default',
@@ -75,43 +82,56 @@ $container['MonoLog'] = function(ContainerInterface $c){
     $log = new Logger($settings['name']);
     $log->pushHandler(new StreamHandler($settings['path'],$settings['level']));
     return $log;
-};
+});
 
-$container['Session'] = function(ContainerInterface $c){
+$container->set('Session',function(ContainerInterface $c){
     return new Helper();
-};
+});
 
-$container['PHPRenderer'] = function (ContainerInterface $c) {
+$container->set('PHPRenderer',function (ContainerInterface $c) {
     $settings = $c->get('settings');
-    return new Slim\Views\PhpRenderer($settings['config']['template_path']);
-};
+    return new PhpRenderer($settings['config']['template_path']);
+});
 
-$container['TwigRenderer'] = function(ContainerInterface $c){
+$container->set('TwigRenderer',function(ContainerInterface $c){
     $settings = $c->get('settings');
-    $view = new \Slim\Views\Twig($settings['config']['template_path']);
+    return new Twig($settings['config']['template_path']);
+});
 
-    // Instantiate and add Slim specific extension
-    $router = $c->get('router');
-    $uri = \Slim\Http\Uri::createFromEnvironment(new \Slim\Http\Environment($_SERVER));
-    $view->addExtension(new \Slim\Views\TwigExtension($router, $uri));
-    return $view;
-};
-
-$container['SmartyRenderer'] = function (ContainerInterface $c) {
+$container->set('SmartyRenderer',function(ContainerInterface $c){
+    //todo get a smarty that can work with slim 4
     $settings = $c->get('settings');
-    $view = new \Slim\Views\Smarty($settings['config']['template_path']);
-    return $view;
-};
+    return new Twig($settings['config']['template_path']);
+});
 
-/*$container['errorHandler'] = function(ContainerInterface $c){
-    return function(\Slim\Http\Request $rq, \Slim\Http\Response $rs, Exception $exception) use ($c){
-        $rq = $rq->withAttribute("Error_Location",$exception->getFile()." Line:".$exception->getLine());
-        return \App\Extension\Extensions::ErrorHandler($rq,$rs,500,$exception->getMessage());
-    };
-};
+$container->set('Response',function(ContainerInterface $c){
+    return new Response();
+});
 
-$container['notFoundHandler'] = function(ContainerInterface $c){
-    return function(\Slim\Http\Request $rq, \Slim\Http\Response $rs) use ($c){
-        return \App\Extension\Extensions::ErrorHandler($rq,$rs,404,"Specified route not found");
-    };
-};*/
+$container->set('Authenticator',function(ContainerInterface $c){
+    $db = null;
+    $db_settings = $c->get('settings');
+    $db_settings = $db_settings['config'][$db_settings['config']['mode']]['database'];
+    switch($db_settings['database_type'])
+    {
+        case 'sqlite':  {
+            $db = new PDO('sqlite:'.$db_settings['database_file']);
+            break;
+        }
+        case 'mysql': {
+            $dsn = (
+                'mysql:dbname='.
+                $db_settings['database_name'].
+                ';host='.
+                $db_settings['server'].
+                ';port='.
+                $db_settings['port']
+            );
+            $db = new PDO($dsn,$db_settings['username'],$db_settings['password']);
+            break;
+        }
+    }
+
+    if(is_null($db)) trigger_error("A valid authentication driver type could not be determined");
+    return new Auth($db);
+});

@@ -4,13 +4,14 @@
 namespace App\Utility;
 
 
+use App\Interfaces\IView;
 use Psr\Container\ContainerInterface;
 use Slim\Views\PhpRenderer;
-use Slim\Views\Smarty;
+//use Slim\Views\Smarty;
 use Slim\Views\Twig;
 use Twig\Error\LoaderError;
 
-class View
+class View implements IView
 {
     /**
      * @var PhpRenderer
@@ -25,7 +26,7 @@ class View
     /**
      * @var Smarty
      */
-    private $smartyDriver;
+    //private $smartyDriver;
 
     /**
      * @var ArrayFunction
@@ -36,7 +37,7 @@ class View
     {
         $this->phpDriver = $c->get('PHPRenderer');
         $this->twigDriver = $c->get('TwigRenderer');
-        $this->smartyDriver = $c->get('SmartyRenderer');
+        //$this->smartyDriver = $c->get('SmartyRenderer');
         $this->arrayConverter = $c->get('ArrayFunctionUtility');
     }
 
@@ -77,7 +78,7 @@ class View
     {
         $attributes = $this->arrayConverter->ObjectToArray($data);
         $location = $this->ExtractFileName($template,'tpl');
-        return $this->smartyDriver->fetch($location,$attributes);
+        //return $this->smartyDriver->fetch($location,$attributes);
     }
 
     private function ExtractFileName($file,$extension)

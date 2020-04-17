@@ -5,6 +5,7 @@ namespace App\Utility;
 
 use App\Interfaces\ISession;
 use Psr\Container\ContainerInterface;
+use SlimSession\Helper;
 
 class Session implements ISession
 {
@@ -24,7 +25,7 @@ class Session implements ISession
     private $Lock;
 
     /**
-     * @var ISession
+     * @var Helper
      */
     private $Driver;
 
@@ -34,6 +35,8 @@ class Session implements ISession
         {
             $this->Driver = $c->get("Session");
             $this->Lock = false;
+            $this->Flash = $this->Driver->get('_flash',[]);
+            $this->Driver->delete('_flash');
         }
         else
         {
@@ -45,8 +48,8 @@ class Session implements ISession
                 $this->Flash = $_SESSION['_flash'];
                 unset($_SESSION['_flash']);
             }
+            $this->Storage = $_SESSION;
         }
-        $this->Storage = $_SESSION;
     }
 
     public function GetItem($id,$default=null)
@@ -64,12 +67,6 @@ class Session implements ISession
     public function GetFlashItem($id,$default=null)
     {
         if($this->Lock) return null;
-        if(!is_null($this->Driver))
-        {
-            $data = $this->Driver->get($id,$default);
-            $this->Driver->delete($id);
-            return $data;
-        }
         return (isset($this->Flash[$id]))
             ? $this->Flash[$id]
             : $default;
@@ -78,7 +75,11 @@ class Session implements ISession
     public function SetItem($id,$value)
     {
         if(!$this->Lock)
-            $this->Storage[$id] = $value;
+        {
+            (!is_null($this->Driver))
+                ? $this->Driver->set($id,$value)
+                : $this->Storage[$id] = $value;
+        }
     }
 
     public function SetFlashItem($id,$value)
@@ -90,16 +91,33 @@ class Session implements ISession
     public function DeleteItem($id)
     {
         if(!$this->Lock)
-            if(isset($this->Storage[$id]))
-                unset($this->Storage[$id]);
+        {
+            if(!is_null($this->Driver))
+            {
+                $this->Driver->delete($id);
+            }
+            else
+            {
+                if(isset($this->Storage[$id]))
+                    unset($this->Storage[$id]);
+            }
+        }
     }
 
     public function Lock()
     {
         if(!$this->Lock)
         {
-            $_SESSION = $this->Storage;
-            session_write_close();
+            if(!is_null($this->Driver))
+            {
+                if(isset($this->Storage['_flash']))
+                    $this->Driver->set("_flash",$this->Storage['_flash']);
+            }
+            else
+            {
+                $_SESSION = $this->Storage;
+                session_write_close();
+            }
             $this->Lock = true;
         }
     }

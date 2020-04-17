@@ -39,6 +39,11 @@ return [
             'pre_loader'                =>  __DIR__ . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'index.php',
             'app_user_id'               =>  'UID',
             'default_app_user'          =>  'System',
+            'access_control'            =>  false,
+            'authentication'            =>  false,
+            'simulation_login'          =>  false,
+            'simulation_id'             =>  1,
+            'default_password'          =>  'User12345',    //use random to generate random password
             'mode'                      =>  'development',
             'render_engine'             =>  'php',
             'settings'                  =>  [

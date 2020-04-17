@@ -8,7 +8,7 @@ use App\Interfaces\IArrayFunction;
 use App\Interfaces\IMedoo;
 use App\Interfaces\ISetting;
 use Psr\Container\ContainerInterface;
-use Software\Provider\SettingsModel;
+use Software\Settings\Model;
 
 class Setting implements ISetting
 {
@@ -35,38 +35,49 @@ class Setting implements ISetting
     }
 
     /**
-     * @return SettingsModel
+     * @return Model
      */
     public function Load()
     {
-        $model = new SettingsModel();
+        $model = new Model();
         $settings = $this->DB->select($this->Configuration->SettingsTable,[
             $this->Configuration->SettingsTableKey,
             $this->Configuration->SettingsTableValue
         ]);
         if(is_array($settings) && !empty($settings))
             foreach($settings as $item)
-                $model->{$item[$this->Configuration->SettingsTableKey]}
-                    = $item[$this->Configuration->SettingsTableValue];
+                if(property_exists($model,$item[$this->Configuration->SettingsTableKey]))
+                    $model->{$item[$this->Configuration->SettingsTableKey]}
+                        = $item[$this->Configuration->SettingsTableValue];
 
         return $model;
     }
 
     /**
-     * @param SettingsModel $model
+     * @param Model $model
      * @return void
      */
-    public function Save(SettingsModel $model)
+    public function Save(Model $model)
     {
         $original = $this->Load();
         foreach($model as $key => $val)
         {
-            if($original->{$key} === $val) continue;
-            $this->DB->update($this->Configuration->SettingsTable,[
-                $this->Configuration->SettingsTableValue => $val
-            ],[
-               $this->Configuration->SettingsTableKey => $key
-            ]);
+            if(!$this->DB->has($this->Configuration->SettingsTable,[$this->Configuration->SettingsTableKey => $key]))
+            {
+                $this->DB->insert($this->Configuration->SettingsTable,[
+                    $this->Configuration->SettingsTableKey      =>  $key,
+                    $this->Configuration->SettingsTableValue    =>  $val
+                ]);
+            }
+            else
+            {
+                if($original->{$key} === $val) continue;
+                $this->DB->update($this->Configuration->SettingsTable,[
+                    $this->Configuration->SettingsTableValue => $val
+                ],[
+                    $this->Configuration->SettingsTableKey => $key
+                ]);
+            }
         }
     }
 }

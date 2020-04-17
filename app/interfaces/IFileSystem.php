@@ -16,5 +16,11 @@ interface IFileSystem
 
     public function Delete($fileName);
 
+    public function DeleteDir($fileName);
+
+    public function CleanDir($fileName);
+
+    public function RecurseCopyDir($src,$dst);
+
     public function Purge();
 }

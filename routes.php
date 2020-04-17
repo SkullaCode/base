@@ -1,6 +1,7 @@
 <?php /** @noinspection ALL */
 
 $app
+    ->add(\App\MiddleWare\Simulation\GeneratedSession::class)
     ->add(\App\MiddleWare\Transformation\ResponseHeader::class)
     ->add(\App\MiddleWare\Transformation\SessionTracker::class)
     ->add(\App\MiddleWare\Transformation\ModelMapping::class)
@@ -16,8 +17,10 @@ if(is_array($location))
     foreach($location as $item)
         if(!in_array($item,['.','..']))
             $routes[] = $entity_dir.DIRECTORY_SEPARATOR.$item;
+$routes[] = $root_dir.DIRECTORY_SEPARATOR.'Lists';
 $routes[] = $root_dir.DIRECTORY_SEPARATOR.'Query';
-$routes[] = $root_dir.DIRECTORY_SEPARATOR.'List';
+$routes[] = $root_dir.DIRECTORY_SEPARATOR.'UI';
+$routes[] = $root_dir.DIRECTORY_SEPARATOR.'Settings';
 
 foreach($routes as $dir)
 {
@@ -26,16 +29,33 @@ foreach($routes as $dir)
     $route = require_once($file);
     if(is_array($route))
     {
-        $g = $app->group('/'.trim($route['route'],'/'),function() use($route){
+        $g = $app->group('/'.trim($route['route'],'/'),function(\Slim\Interfaces\RouteCollectorProxyInterface $group) use($route){
             foreach($route['routes'] as $item)
             {
-                $r = $this->{$item['method']}($item['url'],$item['class'].':'.$item['action']);
-                if(is_array($item['middleware']) && !empty($item['middleware']))
+                $r = $group->{$item['method']}($item['url'],$item['class'].':'.$item['action']);
+                if(isset($item['access']) && is_array($item['access']) && !empty($item['access']))
+                {
+                    //add developer privilege to each route item
+                    $item['access'][] = \Software\Entity\User\Constants\PrivilegeCode::DEVELOPER;
+                    $hash = md5(trim($route['route'],'/').trim($item['url'],'/').$item['method']);
+                    $r->add(\App\MiddleWare\Validation\AccessRights::class)
+                        ->add(new \App\MiddleWare\Validation\AddPrivilegeToRoute(\App\Constant\RequestModel::ACCESS_RIGHTS_METHOD,$item['access']));
+
+                }
+                if(isset($item['middleware']) &&  is_array($item['middleware']) && !empty($item['middleware']))
                     foreach($item['middleware'] as $middleware)
                         $r->add($middleware);
             }
         });
-        if(is_array($route['middleware']) && !empty($route['middleware']))
+        if(isset($route['access']) && is_array($route['access']) && !empty($route['access']))
+        {
+            //add developer privilege to each route
+            $route['access'][] = \Software\Entity\User\Constants\PrivilegeCode::DEVELOPER;
+            $hash = md5(trim($route['route'],'/'));
+            $g->add(\App\MiddleWare\Validation\AccessRights::class)
+                ->add(new \App\MiddleWare\Validation\AddPrivilegeToRoute(\App\Constant\RequestModel::ACCESS_RIGHTS_CONTROLLER,$route['access']));
+        }
+        if(isset($route['middleware']) && is_array($route['middleware']) && !empty($route['middleware']))
             foreach($route['middleware'] as $middleware)
                 $g->add($middleware);
     }
@@ -46,7 +66,10 @@ foreach($routes as $dir)
     require_once($file);
 }
 
-$app->get('/',\App\Controller\AppController::class.':Load');
-$app->get('/bootstrap-info',\App\Controller\AppController::class.':BootstrapInfo');
-$app->get('/log-out',\App\Controller\AppController::class.':Kill');
-$app->get('/test',\Software\Test\Controller::class);
+$app->post('/update',\App\Controller\AppController::class.':Update')
+    ->add(\App\MiddleWare\Update\GetExecutableFile::class)
+    ->add(\App\MiddleWare\Update\ExtractUpdatePackage::class)
+    ->add(\App\MiddleWare\Update\UploadUpdatePackage::class)
+    ->add(\App\MiddleWare\Update\WorkAreaSetup::class)
+    ->add(\App\MiddleWare\Validation\SessionExists::class);
+

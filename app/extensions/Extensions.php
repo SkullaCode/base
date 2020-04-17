@@ -9,6 +9,7 @@ use App\Utility\Logger;
 use App\Utility\View;
 use Exception;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -21,6 +22,11 @@ class Extensions
     private static $container;
 
     /**
+     * @var ResponseInterface
+     */
+    private static $response;
+
+    /**
      * @var View
      */
     private static $renderEngine;
@@ -28,6 +34,7 @@ class Extensions
     public static function init(ContainerInterface $c)
     {
         self::$container = $c;
+        self::$response = $c->get('Response');
         self::$renderEngine = $c->get('ViewUtility');
     }
 
@@ -37,8 +44,12 @@ class Extensions
      */
     private static function RenderView($rq)
     {
-        $renderEngineType = self::$container->get('settings');
-        $renderEngineType = strtolower($renderEngineType['config']['render_engine']);
+        $renderEngineType = $rq->getAttribute(RequestModel::RENDER_ENGINE);
+        if(is_null($renderEngineType))
+        {
+            $renderEngineType = self::$container->get('settings');
+            $renderEngineType = strtolower($renderEngineType['config']['render_engine']);
+        }
         $template = $rq->getAttribute(RequestModel::TEMPLATE);
         $params = $rq->getAttribute(RequestModel::PROCESSED_MODEL);
         $buffer = "";
@@ -46,22 +57,22 @@ class Extensions
         {
             case 'php'      : { $buffer = self::$renderEngine->PHPHtml($template,$params);     break; }
             case 'twig'     : { $buffer = self::$renderEngine->TwigHtml($template,$params);    break; }
-            case 'smarty'   : { $buffer = self::$renderEngine->SmartyHtml($template,$params);  break; }
+            //case 'smarty'   : { $buffer = self::$renderEngine->SmartyHtml($template,$params);  break; }
         }
         return $buffer;
     }
 
     /**
      * @param Request $rq
-     * @param Response $rs
      * @param int $code
      * @param string $message
      * @return Response
      */
-    public static function ErrorHandler(Request $rq, Response $rs,$code=500,$message="Application Error")
+    public static function ErrorHandler(Request $rq,$code=500,$message="Application Error")
     {
         if(is_string($code)){ $message = $code; $code = 500; }
-        $response = clone $rs;
+        $response = clone self::$response;
+        $response = $response->withHeader("X-Response-Message",$message);
         $error = [
             'Location'      =>  $rq->getAttribute("Error_Location"),
             'Entity'        =>  $rq->getAttribute("Error_Entity"),
@@ -84,7 +95,8 @@ class Extensions
         else
         {
             $rq = $rq
-                ->withAttribute(RequestModel::TEMPLATE,"error.{$code}")
+                ->withAttribute(RequestModel::TEMPLATE,"error_pages.{$code}")
+                ->withAttribute(RequestModel::RENDER_ENGINE,'php')
                 ->withAttribute(RequestModel::PROCESSED_MODEL,(object)$error);
             $buffer = self::RenderView($rq);
             $body->write($buffer);
@@ -98,17 +110,17 @@ class Extensions
 
     /**
      * @param Request $rq
-     * @param Response $rs
      * @param int|string $code
      * @param string $message
      * @return Response
      */
-    public static function SuccessHandler(Request $rq, Response $rs,$code=200,$message="Request Processed Successfully")
+    public static function SuccessHandler(Request $rq, $code=200,$message="Request Processed Successfully")
     {
         if(is_string($code)){ $message = $code; $code = 200; }
-        $response = clone $rs;
+        $response = clone self::$response;
+        $response = $response->withHeader("X-Response-Message",$message);
         $body = $response->getBody();
-        if($rq->getHeaderLine('X-Requested-With') === 'XMLHttpRequest')
+        if(strtolower($rq->getHeaderLine('X-Requested-With')) === 'xmlhttprequest')
         {
             $info = $rq->getAttribute(RequestModel::PROCESSED_MODEL);
             $info = (!is_null($info))
@@ -131,6 +143,16 @@ class Extensions
                 ->withHeader('content-length',strlen($buffer))
                 ->withBody($body);
         }
+    }
+
+    public static function RedirectHandler(Request $rq, $code = 302, $url = null)
+    {
+        if(is_string($code)) {$url = $code; $code = 302; }
+        $response = clone self::$response;
+        return $response
+            ->withStatus($code,"Redirect")
+            ->withHeader("Location",$url)
+            ->withHeader("X-Redirect-To",$url);
     }
 
     public static function LogHandler(Exception $e)

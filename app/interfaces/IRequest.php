@@ -10,7 +10,9 @@ interface IRequest
 
     public function HostName();
 
-    public function BaseURL();
+    public function BaseURL($slug="");
 
     public function IPAddress();
+
+    public function IsAjaxRequest();
 }

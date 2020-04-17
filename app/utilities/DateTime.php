@@ -5,6 +5,7 @@ namespace App\Utility;
 
 
 use App\Interfaces\IDateTime;
+use Exception;
 
 class DateTime implements IDateTime
 {
@@ -22,6 +23,11 @@ class DateTime implements IDateTime
     public function DateStringFormat()
     {
         return 'Y-m-d';
+    }
+
+    public function DateStringFormatUI()
+    {
+        return 'l F d, Y';
     }
 
     /**
@@ -45,21 +51,35 @@ class DateTime implements IDateTime
      */
     public function DateTimeStringFormatUI()
     {
-        return 'l F d, Y';
+        return 'l F d, Y \a\t h:i:s A';
     }
 
     /**
      * @param \DateTime $date DateTime object
+     * @param null|string $string format
      * @return string
      */
-    public function FormatDateToString($date)
+    public function FormatDateToString($date, $string=null)
     {
-        return $date->format('Y-m-d H:i:s');
+        if(is_null($string)) return $date->format($this->DateStringFormat());
+        return $date->format($string);
+    }
+
+    /**
+     * @param \DateTime $date DateTime object
+     * @param null|string $string format
+     * @return string
+     */
+    public function FormatDateTimeToString($date, $string = null)
+    {
+        if(is_null($string)) return $date->format($this->DateTimeStringFormat());
+        return $date->format($string);
     }
 
     /**
      * @param string $stringDate string representation of date in (Y-m-d H:i:s)
      * @return \DateTime
+     * @throws Exception
      */
     public function FormatStringToDate($stringDate)
     {
@@ -68,11 +88,13 @@ class DateTime implements IDateTime
 
     /**
      * @param int $timeStamp unix time stamp value
+     * @param string $string format
      * @return string
+     * @throws Exception
      */
-    public function FormatTimeStampToString($timeStamp)
+    public function FormatTimeStampToString($timeStamp, $string)
     {
-        return (new \DateTime())->setTimestamp($timeStamp)->format($this->DateTimeStringFormat());
+        return (new \DateTime())->setTimestamp($timeStamp)->format($string);
     }
 
     /**
@@ -88,6 +110,7 @@ class DateTime implements IDateTime
     /**
      * @param int $timeStamp unix time stamp value
      * @return \DateTime
+     * @throws Exception
      */
     public function FormatTimeStampToDate($timeStamp)
     {
@@ -109,6 +132,15 @@ class DateTime implements IDateTime
      */
     public function FormatDateToUIString($date)
     {
-        return $date->format(self::DateTimeStringFormatUI());
+        return $date->format($this->DateStringFormatUI());
+    }
+
+    /**
+     * @param \DateTime $date object
+     * @return string
+     */
+    public function FormatDateTimeToUIString($date)
+    {
+        return $date->format($this->DateTimeStringFormatUI());
     }
 }

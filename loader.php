@@ -1,6 +1,9 @@
 <?php
 
-use Slim\App;
+use App\Provider\AjaxErrorRenderer;
+use DI\Container;
+use Slim\Factory\AppFactory;
+use Slim\Middleware\MethodOverrideMiddleware;
 
 require __DIR__ . './vendor/autoload.php';
 
@@ -16,7 +19,9 @@ $settings = require __DIR__ . './settings.php';
 
 try
 {
-    $app = new App($settings);
+    $container = new Container();
+    AppFactory::setContainer($container);
+    $app = AppFactory::create();
 }
 catch(InvalidArgumentException $e)
 {
@@ -32,7 +37,17 @@ $app->add(new \Slim\Middleware\Session([
     'lifetime' => '1 hour'
 ]));
 
+$app->addRoutingMiddleware();
+
+$methodOverrideMiddleware = new MethodOverrideMiddleware();
+$app->add($methodOverrideMiddleware);
+
+
+$inactive = session_status() === PHP_SESSION_NONE;
+if ($inactive) session_start();
+
 $container = $app->getContainer();
+$container->set("settings",$settings['settings']);
 global $METHOD_CONTAINER;
 $METHOD_CONTAINER = [];
 
@@ -52,3 +67,14 @@ require __DIR__ . './src/initialization.php';
 
 // Register routes
 require __DIR__ . './routes.php';
+
+//$app->addRoutingMiddleware();
+
+$e = $app->addErrorMiddleware(true,false,false);
+$handler = $e->getDefaultErrorHandler();
+$handler->registerErrorRenderer('application/json',AjaxErrorRenderer::class);
+//force JSON response for AJAX requests
+if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+{
+    $handler->forceContentType('application/json');
+}
