@@ -51,6 +51,8 @@ $container->set("settings",$settings['settings']);
 global $METHOD_CONTAINER;
 $METHOD_CONTAINER = [];
 
+define("ROOT_FOLDER",rtrim(__DIR__,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR);
+
 // Set up dependencies
 require __DIR__ . './src/drivers.php';
 

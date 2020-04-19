@@ -9,14 +9,8 @@ if (PHP_SAPI == 'cli-server') {
     }
 }
 
-require_once pathinfo($_SERVER['DOCUMENT_ROOT'],PATHINFO_DIRNAME).DIRECTORY_SEPARATOR.'loader.php';
+require_once './loader.php';
 
 // Run app
 //todo write errors to log file
-try {
-    $app->run();
-}
-catch (Exception $e) {
-    header("HTTP/1.1 500 Internal Server Error");
-    exit();
-}
+$app->run();

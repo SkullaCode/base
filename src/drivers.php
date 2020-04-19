@@ -135,3 +135,16 @@ $container->set('Authenticator',function(ContainerInterface $c){
     if(is_null($db)) trigger_error("A valid authentication driver type could not be determined");
     return new Auth($db);
 });
+
+$container->set("Version",function(ContainerInterface $c){
+    $version = @file_get_contents(ROOT_FOLDER.'version.json');
+    if($version !== false)
+    {
+        return json_decode($version);
+    }
+    return (object)[
+        'app_version'           =>  "",
+        'framework_version'     =>  "",
+        'inherit'               =>  true
+    ];
+});

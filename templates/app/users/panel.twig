@@ -1,0 +1,368 @@
+{% extends "landing/index.twig" %}
+
+{% block templates %}
+    <div id="listing" data-action="list-panel">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <button
+                    class="btn btn-success btn-lg"
+                    data-action="manage"
+                    data-type="add"
+                    onclick="Controller.PanelSelect(this)"
+            >
+                <i class="fa fa-plus"></i>
+                {{ addButtonHeader }}
+            </button>
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>{{ tableHeader }}</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table id="listingTable" data-actions="3" class="table table-condensed"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="manage" data-action="management-panel">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2 class="bind" id="FormHeader"></h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <form>
+                        <div class="form-group">
+                            <label for="UserName">User Name</label>
+                            <input type="text" id="UserName" name="username" class="form-control bind bind-value"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="FirstName">First Name</label>
+                            <input type="text" id="FirstName" name="firstname" class="form-control bind bind-value"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="LastName">Last Name</label>
+                            <input type="text" id="LastName" name="lastname" class="form-control bind bind-value"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="EmailAddress">Email Address</label>
+                            <input type="text" id="EmailAddress" name="email" class="form-control bind bind-value"/>
+                        </div>
+                        <div id="includes" class="form-group">
+                            <input type="hidden" class="bind bind-value" id="ID" name="ID">
+                        </div>
+                        <div class="form-group">
+                            <button
+                                    type="button"
+                                    class="btn btn-success btn-lg"
+                                    data-notif-success="toaster"
+                                    data-notif-error="alert"
+                                    data-load-type="panel"
+                                    onclick="Controller.FormSubmit(this)"
+                            >
+                                <i class="fa fa-save"></i>
+                                Submit
+                            </button>
+                            <button
+                                    type="button"
+                                    class="btn btn-default btn-sm"
+                                    data-action="listing"
+                                    title="Edit"
+                                    onclick="Controller.PanelSelect(this)"
+                            >
+                                <i class="fa fa-list"></i>
+                                Back to List
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="managerButtons">
+        <div class="btn-group" role="group">
+            <div class="btn-group">
+                <button
+                        type="button"
+                        class="btn btn-warning btn-sm"
+                        data-action="details"
+                        title="Details"
+                        onclick="Controller.ModalSelect(this)"
+                >
+                    <i class="fa fa-exclamation-circle"></i>
+                    Details
+                </button>
+                <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        data-action="manage-roles"
+                        data-type="manage-roles"
+                        title="Manage User Roles"
+                        onclick="Controller.ModalSelect(this)"
+                >
+                    <i class="fa fa-edit"></i>
+                    Roles
+                </button>
+                <button
+                        type="button"
+                        class="btn btn-danger btn-sm"
+                        data-action="manage"
+                        data-complete="ReloadPanel"
+                        data-type="delete"
+                        title="Remove"
+                        onclick="Controller.DeleteItem(this)"
+                >
+                    <i class="fa fa-recycle"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="manage-roles" data-action="manage-roles-modal">
+
+    </div>
+
+    <div id="details" data-action="details-modal">
+        <div class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 id="ModalHeader" class="bind modal-title"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-condensed table-striped table-bordered">
+                            <tr>
+                                <td><strong>Username:</strong></td>
+                                <td><p id="UserName" class="bind"></p></td>
+                            </tr>
+                            <tr>
+                                <td><strong>First Name:</strong></td>
+                                <td><p id="FirstName" class="bind"></p></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Last Name:</strong></td>
+                                <td><p id="LastName" class="bind"></p></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email Address:</strong></td>
+                                <td><p id="EmailAddress" class="bind"></p></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Assigned Roles:</strong></td>
+                                <td><p id="Roles" class="bind" data-action="format-roles"></p></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Account Verified:</strong></td>
+                                <td><p id="Verified" class="bind"></p></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Account Resettable:</strong></td>
+                                <td><p id="Resettable" class="bind"></p></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Date Registered:</strong></td>
+                                <td><p id="Registered" class="bind"></p></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Last Login:</strong></td>
+                                <td><p id="LastLogin" class="bind"></p></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block customScript %}
+    <script>
+        const PageParameters = {
+            listingUrl:  '/query/user-list',
+            listingHeaders: [
+                {
+                    title: "#",
+                    data: "ID"
+                },
+                {
+                    title: "User Name",
+                    data: "UserName"
+                },
+                {
+                    title: "Email Address",
+                    data: "EmailAddress"
+                },
+                {
+                    title: "Last Login",
+                    data:"LastLogin"
+                },
+                {
+                    title: "Verified",
+                    render: function(data, type, row, meta){
+                        return (row.Verified) ? "Yes" : "No";
+                    }
+                },
+                {
+                    name:"Options",
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row, meta){
+                        const buttons = Service.FindElement("#managerButtons");
+                        jQuery.each(buttons.find("button"),function(){
+                            jQuery(this).attr("data-id",row.ID);
+                        });
+                        return buttons.html();
+                    }
+                }
+            ]
+        };
+
+        Service.Data.AddMethod('list-panel',function(component){
+            Service.ServerRequest({
+                request: "GET",
+                params: {},
+                site: PageParameters.listingUrl,
+                success: function(data){
+                    Service.ModelData['listing'] = [];
+                    if(data.data.length > 0){
+                        data.data.forEach(function(item){
+                            Service.ModelData['listing'][item.ID] = item;
+                        });
+                    }
+                    const table = jQuery('#listingTable');
+                    let columnWidth = "235px";
+                    let actionButtons = table.data("actions");
+                    if (typeof actionButtons !== "undefined") {
+                        switch (actionButtons) {
+                            case 1: { columnWidth = "100px"; break; }
+                            case 2: { columnWidth = "175px"; break; }
+                            case 3: { columnWidth = "235px"; break; }
+                            case 4: { columnWidth = "295px"; break; }
+                            case 5: { columnWidth = "365px"; break; }
+                        }
+                    }
+                    table.DataTable({
+                        data: data.data,
+                        columns: PageParameters.listingHeaders,
+                        columnDefs: [
+                            {
+                                "width": columnWidth,
+                                "targets": -1
+                            }
+                        ]
+                    });
+                    table.attr("width", "100%");
+                },
+                error: Service.ErrorHandler
+            });
+        });
+        Service.Data.AddMethod("management-panel",function(component){
+            let form = component.find("form");
+            form.attr("action","user");
+            form.attr("method","post");
+            switch(component.data("type"))
+            {
+                case "add":{
+                    form.find("input").addClass("clear-success");
+                    form.append(`<input type="hidden" name="_METHOD" value="PUT">`);
+                    let data = {"FormHeader":"Add User"};
+                    Service.Bind(component,data);
+                    break;
+                }
+                case "edit":{
+                    const id = component.data("id");
+                    let data = Service.ModelData['listing'][id];
+                    data["FormHeader"] = "Edit User";
+                    Service.Bind(component,data);
+                    break;
+                }
+            }
+        });
+        Service.Data.AddMethod("details-modal",function(component){
+            let data = Service.ModelData['listing'][component.data("id")];
+            data["ModalHeader"] = `Details (${data.FirstName} ${data.LastName})`;
+            Service.Bind(component,data);
+        });
+        Service.Data.AddMethod("manage-roles-modal",function(component){
+            const data = Service.ModelData['listing'][component.data("id")];
+            jQuery.get("/list/role",function(roles){
+                let roleList = "";
+                jQuery.each(roles,function(e){
+                    const checked = (jQuery.inArray(roles[e].Value,data.RoleKeys) === -1) ? "": "checked='checked'";
+                    roleList += `
+                        <tr>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    ${checked}
+                                    value="${roles[e].Value}"
+                                    onchange="Controller.ManageRole(this)"
+                                    data-id="${data.ID}"
+                                />
+                            </td>
+                            <td>
+                                  ${roles[e].Text}
+                            </td>
+                        </tr>
+                    `;
+                });
+                component.find(".modal-title").empty().text("Manage User Roles");
+                component.find(".modal-body").append(`<table class="table table-condensed table-bordered table-striped">${roleList}</table>`);
+            });
+        });
+        Service.Transformation.AddMethod("format-roles",function(roles){
+            return roles.join(", ");
+        });
+
+        Controller.DeleteItem = function(elem){
+            if(Service.ActionButton !== null) return false;
+            Service.ActionButton = jQuery(elem);
+            const id = Service.ActionButton.data("id");
+            const data = Service.ModelData["listing"][id];
+            const itemName = `${data.FirstName} ${data.LastName}`;
+            const entity = "user";
+            if(confirm(`Are you sure you want to delete ${itemName}?`)){
+                Service.ServerRequest({
+                    site: `/${entity}/${id}`,
+                    params: {
+                        _METHOD:"delete"
+                    },
+                    request: "DELETE"
+                });
+            }
+        };
+        Controller.ManageRole = function(checkbox){
+            const checked = checkbox.checked;
+            checkbox = jQuery(checkbox);
+            const userId = checkbox.data("id");
+            const request = (checked)
+                ? "post"
+                : "delete";
+            Service.ActionButton = checkbox;
+            Service.ServerRequest({
+                site: "/user/role",
+                params:{
+                    id: userId,
+                    role: checkbox.val()
+                },
+                request,
+                success: function(result){
+                    jQuery.get(`/user/${userId}`,function(data){
+                        Service.ModelData['listing'][userId] = data;
+                        Service.SuccessHandler(result)
+                    });
+                }
+            });
+        };
+
+
+        jQuery(function(){
+            Controller.PanelSelect(document.getElementById(MainContainer));
+
+        });
+    </script>
+{% endblock %}

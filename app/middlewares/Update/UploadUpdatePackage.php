@@ -15,9 +15,10 @@ class UploadUpdatePackage extends BaseMiddleWareClass
 {
     public function __invoke(Request $rq, Handler $hdl)
     {
+        $session = $this->Utility->Session;
         $vm = $rq->getAttribute(RequestModel::VIEW_MODEL);
         $uploadedFile = $rq->getUploadedFiles();
-        if(!isset($uploadedFile['update']))
+        if(!isset($uploadedFile['zip_file']))
         {
             $rq = $rq
                 ->withAttribute('Error_Location','UploadUpdatePackage')
@@ -28,7 +29,7 @@ class UploadUpdatePackage extends BaseMiddleWareClass
         /**
          * @var UploadedFileInterface $uploadedFile
          */
-        $uploadedFile = $uploadedFile['update'];
+        $uploadedFile = $uploadedFile['zip_file'];
         $fileName = $uploadedFile->getClientFilename();
         $x = explode('.',$fileName);
         $ext = (isset($x[1])) ? $x[1] : null;
@@ -41,6 +42,7 @@ class UploadUpdatePackage extends BaseMiddleWareClass
             return Extensions::ErrorHandler($rq);
         }
         $vm->UpdateArchive = $vm->WorkArea.DIRECTORY_SEPARATOR."UpdatePackage.zip";
+        $session->SetItem('UpdateArchive',$vm->UpdateArchive);
         $uploadedFile->moveTo($vm->UpdateArchive);
         $rq = $rq->withAttribute(RequestModel::VIEW_MODEL,$vm);
         return $hdl->handle($rq);

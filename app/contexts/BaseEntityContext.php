@@ -60,7 +60,7 @@ class BaseEntityContext
     }
 
     /**
-     * @param mixed $params parameters for function
+     * @param array $params parameters for function
      * @param callable $func search criteria
      * @return array
      */
@@ -127,7 +127,7 @@ class BaseEntityContext
         {
             $model = ($res->rowCount() === 1)
                 ? ($this->AutoID) ? $this->Get($this->DBModel->id()) : $this->Get($data[$this->ID])
-                : false;
+                : null;
             return $model;
         }
         return true;

@@ -3,6 +3,7 @@
 !/logs/README.md
 /.idea/*
 /settings.php
+/version.json
 /phinx.yml
 /public/templates_c/
 /db/Default.db

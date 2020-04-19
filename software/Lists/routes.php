@@ -42,6 +42,15 @@ return [
             'middleware'    =>  [
 
             ]
+        ],
+        [
+            'method'        =>  ModelMapping::READING,
+            'url'           =>  '/role',
+            'class'         =>  ListsService::class,
+            'action'        =>  'Role',
+            'middleware'    =>  [
+
+            ]
         ]
     ]
 ];

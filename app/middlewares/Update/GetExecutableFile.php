@@ -28,11 +28,7 @@ class GetExecutableFile extends BaseMiddleWareClass
             ? str_replace('||',DIRECTORY_SEPARATOR,$file)
             : str_replace('||','\\'.'\\',$file);
 
-        $file = (array)json_decode($file);
-        $framework = explode('_',$file['version'])[2];
-        $file['version'] = [];
-        $file['version']['framework'] = $framework;
-        $vm->Executor = $file;
+        $vm->Executor = (array)json_decode($file);
         $rq = $rq->withAttribute(RequestModel::VIEW_MODEL,$vm);
         return $hdl->handle($rq);
     }

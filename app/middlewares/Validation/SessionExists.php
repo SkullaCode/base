@@ -39,10 +39,11 @@ class SessionExists extends BaseMiddleWareClass
         {
             $session = $this->Utility->Session;
             $loadedSession = $session->GetItem(RequestModel::SESSION_LOAD);
+            if(is_null($loadedSession)) return $this->Redirect($rq);
             if(!$this->authenticator->isLoggedIn()) return $this->Redirect($rq);
             if(strtolower($rq->getHeaderLine('X-Requested-With')) === 'xmlhttprequest')
             {
-                $crypt = md5($this->Utility->Request->UserAgent().$session->GetItem('hash'));
+                $crypt = md5($this->Utility->Request->UserAgent().$session->GetItem('Hash'));
                 $token = $rq->getHeader('X-Session-Token');
                 if(is_null($token))
                     return $this->Redirect($rq);
@@ -57,6 +58,7 @@ class SessionExists extends BaseMiddleWareClass
                     return $this->Redirect($rq);
             }
             if(empty($loadedSession)) return $this->Redirect($rq);
+            if(!isset($loadedSession['token'])) return $this->Redirect($rq);
             if($this->authenticator->isBanned()) return Extensions::ErrorHandler($rq,"Your account is banned.");
             if($this->authenticator->isLocked()) return Extensions::ErrorHandler($rq,"Your account is locked.");
         }

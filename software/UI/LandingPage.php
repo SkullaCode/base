@@ -3,26 +3,23 @@
 
 namespace Software\UI;
 
-
-use App\Constant\ErrorCode;
-use App\Constant\ErrorModel;
 use App\Constant\RequestModel;
 use App\Controller\BaseController;
 use App\Extension\Extensions;
-use Delight\Auth\AuthError;
-use Delight\Auth\InvalidSelectorTokenPairException;
-use Delight\Auth\TokenExpiredException;
-use Delight\Auth\TooManyRequestsException;
-use Delight\Auth\UserAlreadyExistsException;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class LandingPage extends BaseController
 {
+    private $version_information;
+    private $app_name;
+
     public function __construct(ContainerInterface $c)
     {
         parent::__construct($c);
         $this->Message = 'Landing Page';
+        $this->version_information = $c->get("Version");
+        $this->app_name = "Base Application";
     }
 
     /**
@@ -40,7 +37,7 @@ class LandingPage extends BaseController
         $params->sub_title          = "Manage {$title}";
         $params->powered            = "Powered by {$this->Environment->RenderEngine}";
         $params->base_url           = $this->Utility->Request->BaseURL();
-        $params->app_name           = "Event Viewer Application";
+        $params->app_name           = $this->app_name;
         $params->addButtonHeader    = "Add {$el}";
         $params->tableHeader        = "{$el} Listing";
         $params->user               = (object)["name" => $session['user']['user_name'], "email" => $session['user']['email']];
@@ -54,7 +51,7 @@ class LandingPage extends BaseController
         $params                     = (object)$rq->getQueryParams();
         $params->title              = "Login";
         $params->base_url           = $this->Utility->Request->BaseURL();
-        $params->app_name           = "Event Viewer Application";
+        $params->app_name           = $this->app_name;
         $params->default_panel      = "login";
         $rq = $rq
             ->withAttribute(RequestModel::PROCESSED_MODEL,$params)
@@ -82,13 +79,30 @@ class LandingPage extends BaseController
         return Extensions::SuccessHandler($rq);
     }
 
+    public function Update(Request $rq)
+    {
+        $params                         = (object)$rq->getQueryParams();
+        $params->title                  = "Update";
+        $params->base_url               = $this->Utility->Request->BaseURL();
+        $params->app_name               = $this->app_name;
+        $params->default_panel          = "login";
+        $params->file_size_limit        = ((int)(ini_get('post_max_size')) * 1048576);
+        $params->app_version            = $this->version_information->app_version;
+        $params->framework_version      = $this->version_information->framework_version;
+        $rq = $rq
+            ->withAttribute(RequestModel::PROCESSED_MODEL,$params)
+            ->withAttribute(RequestModel::TEMPLATE,"landing.update")
+            ->withAttribute(RequestModel::RENDER_ENGINE,"php");
+        return Extensions::SuccessHandler($rq);
+    }
+
     public function ChangePassword(Request $rq)
     {
         $session                    = $this->Utility->Session;
         $params                     = (object)$rq->getQueryParams();
         $params->title              = "Change Password";
         $params->base_url           = $this->Utility->Request->BaseURL();
-        $params->app_name           = "Event Viewer Application";
+        $params->app_name           = $this->app_name;
         $params->default_panel      = "change-password";
         $params->selector           = $session->GetFlashItem("selector");
         $params->token              = $session->GetFlashItem("token");
@@ -108,7 +122,7 @@ class LandingPage extends BaseController
         $params->base_url           = $this->Utility->Request->BaseURL();
         $params->username           = $session['user']['user_name'];
         $params->email              = $session['user']['email'];
-        $params->app_name           = "Event Viewer Application";
+        $params->app_name           = $this->app_name;
         $params->user               = (object)["name" => $session['user']['user_name'], "email" => $session['user']['email']];
         $rq = $rq
             ->withAttribute(RequestModel::PROCESSED_MODEL,$params)
@@ -123,7 +137,7 @@ class LandingPage extends BaseController
         $params->title              = "Dashboard";
         $params->sub_title          = "System overview and metrics";
         $params->base_url           = $this->Utility->Request->BaseURL();
-        $params->app_name           = "Event Viewer Application";
+        $params->app_name           = $this->app_name;
         $params->user               = (object)["name" => $session['user']['user_name'], "email" => $session['user']['email']];
         $rq = $rq
             ->withAttribute(RequestModel::PROCESSED_MODEL,$params)

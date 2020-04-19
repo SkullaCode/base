@@ -1,7 +1,6 @@
 <?php /** @noinspection ALL */
 
 $app
-    ->add(\App\MiddleWare\Simulation\GeneratedSession::class)
     ->add(\App\MiddleWare\Transformation\ResponseHeader::class)
     ->add(\App\MiddleWare\Transformation\SessionTracker::class)
     ->add(\App\MiddleWare\Transformation\ModelMapping::class)
@@ -66,10 +65,32 @@ foreach($routes as $dir)
     require_once($file);
 }
 
-$app->post('/update',\App\Controller\AppController::class.':Update')
-    ->add(\App\MiddleWare\Update\GetExecutableFile::class)
-    ->add(\App\MiddleWare\Update\ExtractUpdatePackage::class)
-    ->add(\App\MiddleWare\Update\UploadUpdatePackage::class)
-    ->add(\App\MiddleWare\Update\WorkAreaSetup::class)
-    ->add(\App\MiddleWare\Validation\SessionExists::class);
-
+$app->group('/update',function(\Slim\Interfaces\RouteCollectorProxyInterface $group){
+    $group->post('',\App\Controller\AppController::class.':Update')
+        ->add(\App\MiddleWare\Update\UploadUpdatePackage::class)
+        ->add(\App\MiddleWare\Update\WorkAreaSetup::class)
+        ->add(\App\MiddleWare\Validation\SessionExists::class);
+    $group->post('/bootstrap-update',\App\Controller\AppController::class.':Bootstrap')
+        ->add(\App\MiddleWare\Simulation\SlowNetworkConnection::class)
+        ->add(\App\MiddleWare\Validation\SessionExists::class);
+    $group->post('/extract-update',\App\Controller\AppController::class.':Extract')
+        ->add(\App\MiddleWare\Update\ExtractUpdatePackage::class)
+        ->add(\App\MiddleWare\Update\LoadFileSystemLocations::class)
+        ->add(\App\MiddleWare\Validation\SessionExists::class);
+    $group->post('/backup-update',\App\Controller\AppController::class.':Backup')
+        ->add(\App\MiddleWare\Simulation\SlowNetworkConnection::class)
+        ->add(\App\MiddleWare\Validation\SessionExists::class);
+    $group->post('/execute-update',\App\Controller\AppController::class.':Execute')
+        ->add(\App\MiddleWare\Update\GetExecutableFile::class)
+        ->add(\App\MiddleWare\Update\LoadFileSystemLocations::class)
+        ->add(\App\MiddleWare\Validation\SessionExists::class);
+    $group->post('/cleanup-update',\App\Controller\AppController::class.':Cleanup')
+        ->add(\App\MiddleWare\Update\GetExecutableFile::class)
+        ->add(\App\MiddleWare\Update\LoadFileSystemLocations::class)
+        ->add(\App\MiddleWare\Validation\SessionExists::class);
+})
+    ->add(\App\MiddleWare\Validation\AccessRights::class)
+    ->add(new \App\MiddleWare\Validation\AddPrivilegeToRoute(\App\Constant\RequestModel::ACCESS_RIGHTS_CONTROLLER,[
+        \Software\Entity\User\Constants\PrivilegeCode::DEVELOPER,
+        \Software\Entity\User\Constants\PrivilegeCode::ADMIN
+    ]));

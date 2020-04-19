@@ -10,7 +10,7 @@ use App\MiddleWare\BaseMiddleWareClass;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as Handler;
-use Software\DbTableContext\File;
+use Software\EntityContext\File;
 
 class NormalizeProfilePicture extends BaseMiddleWareClass
 {

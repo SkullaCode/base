@@ -13,17 +13,20 @@ return [
             'url'           =>  'login',
             'class'         =>  LandingPage::class,
             'action'        =>  'Login',
-            'middleware'    =>  [
-
-            ]
         ],
         [
             'method'        =>  ModelMapping::READING,
             'url'           =>  'log-out',
             'class'         =>  LandingPage::class,
             'action'        =>  'Logout',
+        ],
+        [
+            'method'        =>  ModelMapping::READING,
+            'url'           =>  'update',
+            'class'         =>  LandingPage::class,
+            'action'        =>  'Update',
             'middleware'    =>  [
-
+                SessionExists::class
             ]
         ],
         [
@@ -40,9 +43,6 @@ return [
             'url'           =>  'change-password',
             'class'         =>  LandingPage::class,
             'action'        =>  'ChangePassword',
-            'middleware'    =>  [
-
-            ]
         ],
         [
             'method'        =>  ModelMapping::READING,
