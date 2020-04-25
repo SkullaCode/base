@@ -9,7 +9,7 @@ if (PHP_SAPI == 'cli-server') {
     }
 }
 
-require_once './loader.php';
+require_once pathinfo($_SERVER['DOCUMENT_ROOT'],PATHINFO_DIRNAME).DIRECTORY_SEPARATOR.'loader.php';
 
 // Run app
 //todo write errors to log file
